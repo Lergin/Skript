@@ -86,7 +86,7 @@ public class SkriptCommand implements CommandExecutor {
 	
 	private final static ArgsMessage m_reloading = new ArgsMessage(NODE + ".reload.reloading");
 	
-	private final static void reloading(final CommandSender sender, String what, final Object... args) {
+	private final static void reloading(final CommandSource sender, String what, final Object... args) {
 		what = args.length == 0 ? Language.get(NODE + ".reload." + what) : Language.format(NODE + ".reload." + what, args);
 		Skript.info(sender, StringUtils.fixCapitalization(m_reloading.toString(what)));
 	}
@@ -123,7 +123,7 @@ public class SkriptCommand implements CommandExecutor {
 	//@SuppressFBWarnings("REC_CATCH_EXCEPTION")
 	//final @Nullable Command command, final @Nullable String label,
 	public CommandResult execute(final @Nullable CommandSource sender, final @Nullable CommandContext args) {
-		if (sender == null || command == null || label == null || args == null)
+		if (sender == null || args == null)
 			throw new IllegalArgumentException();
 		if (!skriptCommandHelp.test(sender, args))
 			return CommandResult.success();

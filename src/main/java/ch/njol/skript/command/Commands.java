@@ -38,24 +38,6 @@ import java.util.logging.LogRecord;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.Validate;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.command.SimpleCommandMap;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerChatEvent;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.server.ServerCommandEvent;
-import org.bukkit.help.HelpMap;
-import org.bukkit.help.HelpTopic;
-import org.bukkit.plugin.SimplePluginManager;
 import org.eclipse.jdt.annotation.Nullable;
 
 import ch.njol.skript.ScriptLoader;
@@ -80,6 +62,19 @@ import ch.njol.skript.util.Utils;
 import ch.njol.util.Callback;
 import ch.njol.util.NonNullPair;
 import ch.njol.util.StringUtils;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.source.ConsoleSource;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.EventListener;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.command.SendCommandEvent;
+import org.spongepowered.api.event.filter.cause.Root;
+import org.spongepowered.api.event.message.MessageChannelEvent;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColor;
+import org.spongepowered.api.text.format.TextColors;
 
 //TODO option to disable replacement of <color>s in command arguments?
 
@@ -95,8 +90,8 @@ public abstract class Commands {
 	
 	private final static Map<String, ScriptCommand> commands = new HashMap<String, ScriptCommand>();
 	
-	@Nullable
-	private static SimpleCommandMap commandMap = null;
+//	@Nullable
+//	private static SimpleCommandMap commandMap = null;
 	@Nullable
 	private static Set<String> cmAliases;
 	
@@ -106,7 +101,8 @@ public abstract class Commands {
 	
 	@SuppressWarnings("unchecked")
 	private final static void init() {
-		try {
+		// i think in sponge we don't need this
+		/*try {
 			if (Bukkit.getPluginManager() instanceof SimplePluginManager) {
 				final Field commandMapField = SimplePluginManager.class.getDeclaredField("commandMap");
 				commandMapField.setAccessible(true);
@@ -124,7 +120,7 @@ public abstract class Commands {
 		} catch (final Exception e) {
 			Skript.outdatedError(e);
 			commandMap = null;
-		}
+		}*/
 	}
 	
 	private final static SectionValidator commandStructure = new SectionValidator()
@@ -151,29 +147,27 @@ public abstract class Commands {
 	private final static String unescape(final String s) {
 		return "" + unescape.matcher(s).replaceAll("$0");
 	}
-	
-	private final static Listener commandListener = new Listener() {
-		@SuppressWarnings("null")
-		@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-		public void onPlayerCommand(final PlayerCommandPreprocessEvent e) {
-			if (handleCommand(e.getPlayer(), e.getMessage().substring(1)))
-				e.setCancelled(true);
-		}
-		
-		@SuppressWarnings("null")
-		@EventHandler(priority = EventPriority.HIGHEST)
-		public void onServerCommand(final ServerCommandEvent e) {
-			if (e.getCommand() == null || e.getCommand().isEmpty())
+
+	//		@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	private final static EventListener<SendCommandEvent> commandListener = new EventListener<SendCommandEvent>() {
+		@Override
+		public void handle(SendCommandEvent e) throws Exception {
+			if (e.getCommand() == null || e.getCommand().isEmpty() || !e.getCause().containsType(CommandSource.class))
 				return;
+
+			CommandSource source = (CommandSource) e.getCause().root();
+
 			if (SkriptConfig.enableEffectCommands.value() && e.getCommand().startsWith(SkriptConfig.effectCommandToken.value())) {
-				if (handleEffectCommand(e.getSender(), e.getCommand())) {
+				if (handleEffectCommand(source, e.getCommand())) {
 					e.setCommand("");
+					e.setResult(CommandResult.success());
 					suppressUnknownCommandMessage = true;
 				}
 				return;
 			}
-			if (handleCommand(e.getSender(), e.getCommand())) {
+			if (handleCommand(source, e.getCommand())) {
 				e.setCommand("");
+				e.setResult(CommandResult.success());
 				suppressUnknownCommandMessage = true;
 			}
 		}
@@ -194,19 +188,21 @@ public abstract class Commands {
 			}
 		});
 	}
-	
+
+	//Skript.classExists("org.bukkit.event.player.AsyncPlayerChatEvent") ? null :
 	@Nullable
-	private final static Listener pre1_3chatListener = Skript.classExists("org.bukkit.event.player.AsyncPlayerChatEvent") ? null : new Listener() {
+	private final static EventListener<MessageChannelEvent.Chat> pre1_3chatListener =  new EventListener<MessageChannelEvent.Chat>() {
 		@SuppressWarnings("null")
-		@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
-		public void onPlayerChat(final PlayerChatEvent e) {
-			if (!SkriptConfig.enableEffectCommands.value() || !e.getMessage().startsWith(SkriptConfig.effectCommandToken.value()))
+		//@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+		public void handle(final MessageChannelEvent.Chat e) {
+			if (!SkriptConfig.enableEffectCommands.value() || !e.getMessage().toPlain().startsWith(SkriptConfig.effectCommandToken.value()))
 				return;
-			if (handleEffectCommand(e.getPlayer(), e.getMessage()))
-				e.setCancelled(true);
+			if (e.getCause().containsType(CommandSource.class) &&
+					handleEffectCommand(e.getCause().first(CommandSource.class).get(), e.getMessage().toPlain()))
+				e.setMessageCancelled(true);
 		}
 	};
-	@Nullable
+	/*@Nullable
 	private final static Listener post1_3chatListener = !Skript.classExists("org.bukkit.event.player.AsyncPlayerChatEvent") ? null : new Listener() {
 		@SuppressWarnings("null")
 		@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
@@ -236,14 +232,14 @@ public abstract class Commands {
 				}
 			}
 		}
-	};
+	};*/
 	
 	/**
 	 * @param sender
 	 * @param command full command string without the slash
 	 * @return whether to cancel the event
 	 */
-	final static boolean handleCommand(final CommandSender sender, final String command) {
+	final static boolean handleCommand(final CommandSource sender, final String command) {
 		final String[] cmd = command.split("\\s+", 2);
 		cmd[0] = cmd[0].toLowerCase();
 		if (cmd[0].endsWith("?")) {
@@ -268,8 +264,8 @@ public abstract class Commands {
 	}
 	
 	@SuppressWarnings("unchecked")
-	final static boolean handleEffectCommand(final CommandSender sender, String command) {
-		if (!(sender instanceof ConsoleCommandSender || sender.hasPermission("skript.effectcommands") || SkriptConfig.allowOpsToUseEffectCommands.value() && sender.isOp()))
+	final static boolean handleEffectCommand(final CommandSource sender, String command) {
+		if (!(sender instanceof ConsoleSource || sender.hasPermission("skript.effectcommands")))
 			return false;
 		final boolean wasLocal = Language.setUseLocal(false);
 		try {
@@ -284,15 +280,15 @@ public abstract class Commands {
 					log.clear(); // ignore warnings and stuff
 					log.printLog();
 					
-					sender.sendMessage(ChatColor.GRAY + "executing '" + ChatColor.stripColor(command) + "'");
-					if (SkriptConfig.logPlayerCommands.value() && !(sender instanceof ConsoleCommandSender))
+					sender.sendMessage(Text.of(TextColors.GRAY, "executing '", Text.of(command), "'"));
+					if (SkriptConfig.logPlayerCommands.value() && !(sender instanceof ConsoleSource))
 						Skript.info(sender.getName() + " issued effect command: " + command);
 					e.run(new EffectCommandEvent(sender, command));
 				} else {
-					if (sender == Bukkit.getConsoleSender()) // log as SEVERE instead of INFO like printErrors below
-						SkriptLogger.LOGGER.severe("Error in: " + ChatColor.stripColor(command));
+					if (sender == Sponge.getServer().getConsole()) // log as SEVERE instead of INFO like printErrors below
+						SkriptLogger.LOGGER.severe("Error in: " + command);
 					else
-						sender.sendMessage(ChatColor.RED + "Error in: " + ChatColor.GRAY + ChatColor.stripColor(command));
+						sender.sendMessage(Text.of(TextColors.RED, "Error in: ", TextColors.GRAY, Text.of(command)));
 					log.printErrors(sender, "(No specific information is available)");
 				}
 			} finally {
@@ -301,7 +297,7 @@ public abstract class Commands {
 			return true;
 		} catch (final Exception e) {
 			Skript.exception(e, "Unexpected error while executing effect command '" + command + "' by '" + sender.getName() + "'");
-			sender.sendMessage(ChatColor.RED + "An internal error occurred while executing this effect. Please refer to the server log for details.");
+			sender.sendMessage(Text.of(TextColors.RED, "An internal error occurred while executing this effect. Please refer to the server log for details."));
 			return true;
 		} finally {
 			Language.setUseLocal(wasLocal);
@@ -466,7 +462,6 @@ public abstract class Commands {
 		
 		if (Skript.logVeryHigh() && !Skript.debug())
 			Skript.info("registered command " + desc);
-		currentArguments = null;
 		return c;
 	}
 	
@@ -476,10 +471,9 @@ public abstract class Commands {
 //	}
 	
 	public static void registerCommand(final ScriptCommand command) {
-		if (commandMap != null) {
-			command.register(commandMap, cmAliases);
-		}
+		command.register();
 		commands.put(command.getLabel(), command);
+
 		for (final String alias : command.getActiveAliases()) {
 			commands.put(alias.toLowerCase(), command);
 		}
@@ -492,10 +486,7 @@ public abstract class Commands {
 			final ScriptCommand c = commandsIter.next();
 			if (script.equals(c.getScript())) {
 				numCommands++;
-				if (commandMap != null) {
-					assert cmKnownCommands != null;// && cmAliases != null;
-					c.unregister(commandMap, cmKnownCommands, cmAliases);
-				}
+				c.unregister();
 				commandsIter.remove();
 			}
 		}
@@ -506,31 +497,24 @@ public abstract class Commands {
 	
 	public final static void registerListeners() {
 		if (!registeredListeners) {
-			Bukkit.getPluginManager().registerEvents(commandListener, Skript.getInstance());
-			Bukkit.getPluginManager().registerEvents(post1_3chatListener != null ? post1_3chatListener : pre1_3chatListener, Skript.getInstance());
+			Skript skript = Skript.getInstance();
+			Sponge.getEventManager().registerListeners(skript, pre1_3chatListener);
+			Sponge.getEventManager().registerListeners(skript, commandListener);
 			registeredListeners = true;
 		}
 	}
 	
 	public final static void clearCommands() {
-		final SimpleCommandMap commandMap = Commands.commandMap;
-		if (commandMap != null) {
-			final Map<String, Command> cmKnownCommands = Commands.cmKnownCommands;
-			final Set<String> cmAliases = Commands.cmAliases;
-			assert cmKnownCommands != null;// && cmAliases != null;
-			for (final ScriptCommand c : commands.values())
-				c.unregister(commandMap, cmKnownCommands, cmAliases);
-		}
-		for (final ScriptCommand c : commands.values()) {
-			c.unregisterHelp();
-		}
+		for (final ScriptCommand c : commands.values())
+			c.unregister();
+
 		commands.clear();
 	}
 	
 	/**
 	 * copied from CraftBukkit (org.bukkit.craftbukkit.help.CommandAliasHelpTopic)
 	 */
-	public final static class CommandAliasHelpTopic extends HelpTopic {
+	/*public final static class CommandAliasHelpTopic extends HelpTopic {
 		
 		private final String aliasFor;
 		private final HelpMap helpMap;
@@ -567,6 +551,6 @@ public abstract class Commands {
 				return commandSender != null && commandSender.hasPermission(amendedPermission);
 			}
 		}
-	}
+	}*/
 	
 }

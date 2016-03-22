@@ -21,28 +21,15 @@
 
 package ch.njol.skript.command;
 
-import org.bukkit.command.CommandSender;
-import org.bukkit.event.HandlerList;
+import org.spongepowered.api.command.CommandSource;
 
 /**
  * @author Peter Güttinger
  */
 public class EffectCommandEvent extends CommandEvent {
 	
-	public EffectCommandEvent(final CommandSender sender, final String command) {
+	public EffectCommandEvent(final CommandSource sender, final String command) {
 		super(sender, command, new String[0]);
 	}
-	
-	// Bukkit stuff
-	private final static HandlerList handlers = new HandlerList();
-	
-	@Override
-	public HandlerList getHandlers() {
-		return handlers;
-	}
-	
-	public static HandlerList getHandlerList() {
-		return handlers;
-	}
-	
+
 }

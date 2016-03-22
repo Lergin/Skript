@@ -21,7 +21,6 @@
 
 package ch.njol.skript.command;
 
-import org.bukkit.event.HandlerList;
 import org.spongepowered.api.command.CommandSource;
 
 /**
@@ -43,18 +42,6 @@ public class ScriptCommandEvent extends CommandEvent {
 	@Override
 	public String[] getArgs() {
 		throw new UnsupportedOperationException();
-	}
-	
-	// Bukkit stuff
-	private final static HandlerList handlers = new HandlerList();
-	
-	@Override
-	public HandlerList getHandlers() {
-		return handlers;
-	}
-	
-	public static HandlerList getHandlerList() {
-		return handlers;
 	}
 	
 }

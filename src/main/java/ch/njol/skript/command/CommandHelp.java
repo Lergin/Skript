@@ -21,12 +21,9 @@
 
 package ch.njol.skript.command;
 
-import static org.bukkit.ChatColor.*;
-
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
-import org.bukkit.command.CommandSender;
 import org.eclipse.jdt.annotation.Nullable;
 
 import ch.njol.skript.Skript;

@@ -25,26 +25,10 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.Map.Entry;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.PluginCommand;
-import org.bukkit.command.SimpleCommandMap;
-import org.bukkit.entity.Player;
-import org.bukkit.help.GenericCommandHelpTopic;
-import org.bukkit.help.HelpMap;
-import org.bukkit.help.HelpTopic;
-import org.bukkit.help.HelpTopicComparator;
-import org.bukkit.help.IndexHelpTopic;
-import org.bukkit.plugin.Plugin;
 import org.eclipse.jdt.annotation.Nullable;
 
 import ch.njol.skript.Skript;
-import ch.njol.skript.command.Commands.CommandAliasHelpTopic;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.skript.lang.Trigger;
 import ch.njol.skript.lang.TriggerItem;
@@ -61,7 +45,6 @@ import ch.njol.util.StringUtils;
 import ch.njol.util.Validate;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.*;
-import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
@@ -91,9 +74,7 @@ public class ScriptCommand implements CommandCallable {
 	
 	public final static int PLAYERS = 0x1, CONSOLE = 0x2, BOTH = PLAYERS | CONSOLE;
 	final int executableBy;
-	
-	private transient CommandMapping bukkitCommand;
-	
+
 	/**
 	 * Creates a new SkriptCommand.
 	 * 
@@ -123,7 +104,7 @@ public class ScriptCommand implements CommandCallable {
 		aliases.add(0, label);
 
 		this.aliases = aliases;
-		activeAliases = new ArrayList<String>(aliases);
+		activeAliases = new ArrayList<String>();
 		
 		this.description = Utils.replaceEnglishChatStyles(description);
 		this.usage = Utils.replaceEnglishChatStyles(usage);
@@ -134,8 +115,10 @@ public class ScriptCommand implements CommandCallable {
 		this.arguments = arguments;
 		
 		trigger = new Trigger(script, "command /" + name, new SimpleEvent(), items);
-		
-		bukkitCommand = setupBukkitCommand();
+
+		this.commandMapping = Sponge.getCommandManager().register(Skript.getInstance(),this, aliases).get();
+
+		activeAliases.addAll(commandMapping.getAllAliases());
 	}
 
 
@@ -178,14 +161,6 @@ public class ScriptCommand implements CommandCallable {
 		return Text.of(usage);
 	}
 
-
-
-	private CommandMapping setupBukkitCommand() {
-		return Sponge.getCommandManager().register(Skript.getInstance(),this, aliases).get();
-	}
-
-
-
 	public boolean execute(final CommandSource sender, final String commandLabel, final String rest) {
 		if (sender instanceof Player) {
 			if ((executableBy & PLAYERS) == 0) {
@@ -203,18 +178,22 @@ public class ScriptCommand implements CommandCallable {
 			sender.sendMessage(Text.of(permissionMessage));
 			return false;
 		}
-		
-		if (Bukkit.isPrimaryThread()) {
-			execute2(sender, commandLabel, rest);
-		} else {
-			// must not wait for the command to complete as some plugins call commands in such a way that the server will deadlock
-			Bukkit.getScheduler().scheduleSyncDelayedTask(Skript.getInstance(), new Runnable() {
-				@Override
-				public void run() {
-					execute2(sender, commandLabel, rest);
-				}
-			});
-		}
+
+		//todo
+//		if (Bukkit.isPrimaryThread()) {
+//			execute2(sender, commandLabel, rest);
+//		} else {
+//			// must not wait for the command to complete as some plugins call commands in such a way that the server will deadlock
+//			Bukkit.getScheduler().scheduleSyncDelayedTask(Skript.getInstance(), new Runnable() {
+//				@Override
+//				public void run() {
+//					execute2(sender, commandLabel, rest);
+//				}
+//			});
+//		}
+
+		execute2(sender, commandLabel, rest);
+
 		return true; // Skript prints its own error message anyway
 	}
 	
@@ -273,22 +252,22 @@ public class ScriptCommand implements CommandCallable {
 	private CommandMapping commandMapping;
 
 	//todo remove
-	public void register(final SimpleCommandMap commandMap, final @Nullable Set<String> aliases) {
-
-	}
+	//public void register(final SimpleCommandMap commandMap, final @Nullable Set<String> aliases) {
+//
+//	}
 
 	//todo test if it wants to register multiple at ones
-	public void register(final List<String> aliases, CommandSpec commandSpec) {
+	public void register() {
 		final CommandManager commandManager = Sponge.getCommandManager();
 		final Skript skript = Skript.getInstance();
 
-		commandMapping = commandManager.register(skript, commandSpec, aliases).get();
+		commandMapping = commandManager.register(skript, this, aliases).get();
 
 		activeAliases.clear();
 		activeAliases.addAll(commandMapping.getAllAliases());
 	}
 	
-	public void unregister(final Map<List<String>, CommandSpec> knownCommands) {
+	public void unregister() {
 		final CommandManager commandManager = Sponge.getCommandManager();
 
 		commandManager.removeMapping(commandMapping);
