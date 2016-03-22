@@ -23,6 +23,7 @@ package ch.njol.skript.util;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -33,6 +34,10 @@ import ch.njol.skript.aliases.ItemType;
 import ch.njol.skript.localization.Language;
 import ch.njol.skript.localization.LanguageChangeListener;
 import ch.njol.yggdrasil.YggdrasilSerializable;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.meta.ItemEnchantment;
+import org.spongepowered.api.item.Enchantment;
+import org.spongepowered.api.item.inventory.ItemStack;
 
 /**
  * @author Peter Güttinger
@@ -43,7 +48,7 @@ public class EnchantmentType implements YggdrasilSerializable {
 	
 	private final Enchantment type;
 	private final int level;
-	
+
 	/**
 	 * Used for deserialisation only
 	 */
@@ -57,6 +62,12 @@ public class EnchantmentType implements YggdrasilSerializable {
 		assert type != null;
 		this.type = type;
 		this.level = level;
+	}
+
+	public EnchantmentType(final ItemEnchantment ench) {
+		assert ench != null;
+		this.type = ench.getEnchantment();
+		this.level = ench.getLevel();
 	}
 	
 	/**
@@ -78,16 +89,13 @@ public class EnchantmentType implements YggdrasilSerializable {
 		return type;
 	}
 	
-	public boolean has(final ItemType item) {
-		final Map<Enchantment, Integer> enchs = item.getEnchantments();
+	public boolean has(final ItemStack item) {
+		final List<ItemEnchantment> enchs = item.get(Keys.ITEM_ENCHANTMENTS).get();
 		if (enchs == null)
 			return false;
-		final Integer l = enchs.get(type);
-		if (l == null)
-			return false;
-		if (level == -1)
-			return true;
-		return l == level;
+		final Integer l = enchs.indexOf(new ItemEnchantment(type, level));
+
+		return l != -1;
 	}
 	
 	@Override

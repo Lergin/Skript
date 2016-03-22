@@ -46,6 +46,16 @@ import ch.njol.util.Callback;
 import ch.njol.util.NonNullPair;
 import ch.njol.util.Pair;
 import ch.njol.util.StringUtils;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.Living;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
+import org.spongepowered.api.text.format.TextColor;
+import org.spongepowered.api.text.format.TextStyle;
+import org.spongepowered.api.text.format.TextStyles;
 
 /**
  * Utility class.
@@ -93,8 +103,14 @@ public abstract class Utils {
 	public static boolean itemStacksEqual(final @Nullable ItemStack is1, final @Nullable ItemStack is2) {
 		if (is1 == null || is2 == null)
 			return is1 == is2;
-		return is1.getType() == is2.getType() && is1.getDurability() == is2.getDurability()
-				&& (ItemType.itemMetaSupported ? is1.getItemMeta().equals(is2.getItemMeta()) : is1.getEnchantments().equals(is2.getEnchantments()));
+
+		ItemStack is11 = is1.copy();
+		is11.setQuantity(1);
+
+		ItemStack is21 = is2.copy();
+		is21.setQuantity(1);
+
+		return is11.equals(is21);
 	}
 	
 	/**
@@ -106,7 +122,7 @@ public abstract class Utils {
 	 */
 	@SuppressWarnings("unchecked")
 	@Nullable
-	public static <T extends Entity> T getTarget(final LivingEntity entity, @Nullable final EntityData<T> type) {
+	public static <T extends Entity> T getTarget(final Living entity, @Nullable final EntityData<T> type) {
 		if (entity instanceof Creature) {
 			return ((Creature) entity).getTarget() == null || type != null && !type.isInstance(((Creature) entity).getTarget()) ? null : (T) ((Creature) entity).getTarget();
 		}
@@ -369,8 +385,20 @@ public abstract class Utils {
 				return 1;
 		}
 	}
+
+	/**
+	 * Gets the collision height of solid or partially-solid blocks at the center of the block. This is mostly for use in the {@link EffTeleport teleport effect}.
+	 * <p>
+	 * TODO !Update with every version [blocks]
+	 *
+	 * @param type
+	 * @return The block's height at the center
+	 */
+	public static double getBlockHeight(final BlockState type) {
+		return type.get(Keys.HEIGHT).get(); //TODO: does this also work with blocks?!
+	}
 	
-	final static ChatColor[] styles = {ChatColor.BOLD, ChatColor.ITALIC, ChatColor.STRIKETHROUGH, ChatColor.UNDERLINE, ChatColor.MAGIC, ChatColor.RESET};
+	final static TextStyle.Base[] styles = {TextStyles.BOLD, TextStyles.ITALIC, TextStyles.STRIKETHROUGH, TextStyles.UNDERLINE, TextStyles.OBFUSCATED, TextStyles.RESET};
 	final static Map<String, String> chat = new HashMap<String, String>();
 	final static Map<String, String> englishChat = new HashMap<String, String>();
 	static {
@@ -379,8 +407,8 @@ public abstract class Utils {
 			public void onLanguageChange() {
 				final boolean english = englishChat.isEmpty();
 				chat.clear();
-				for (final ChatColor style : styles) {
-					for (final String s : Language.getList("chat styles." + style.name())) {
+				for (final TextStyle.Base style : styles) {
+					for (final String s : Language.getList("chat styles." + style.getName())) {
 						chat.put(s.toLowerCase(), style.toString());
 						if (english)
 							englishChat.put(s.toLowerCase(), style.toString());
@@ -423,7 +451,7 @@ public abstract class Utils {
 			}
 		});
 		assert m != null;
-		m = ChatColor.translateAlternateColorCodes('&', "" + m);
+		m = TextColors.translateAlternateColorCodes('&', "" + m);//TODO somewhere sponge has a methode if im not wrong...
 		return "" + m;
 	}
 	
@@ -450,7 +478,7 @@ public abstract class Utils {
 			}
 		});
 		assert m != null;
-		m = ChatColor.translateAlternateColorCodes('&', "" + m);
+		m = ChatColor.translateAlternateColorCodes('&', "" + m);//TODO somewhere sponge has a methode if im not wrong...
 		return "" + m;
 	}
 	

@@ -38,7 +38,7 @@ import ch.njol.skript.classes.Converter;
  * @author Peter Güttinger
  */
 public abstract class FileUtils {
-	
+	//todo: do i need to change this duo to the use of java8?!
 	private static boolean RUNNINGJAVA6 = true;// = System.getProperty("java.version").startsWith("1.6"); // doesn't work reliably?
 	static {
 		try {

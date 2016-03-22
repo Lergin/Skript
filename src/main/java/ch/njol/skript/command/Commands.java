@@ -98,8 +98,6 @@ public abstract class Commands {
 	@Nullable
 	private static SimpleCommandMap commandMap = null;
 	@Nullable
-	private static Map<String, Command> cmKnownCommands;
-	@Nullable
 	private static Set<String> cmAliases;
 	
 	static {
@@ -113,11 +111,7 @@ public abstract class Commands {
 				final Field commandMapField = SimplePluginManager.class.getDeclaredField("commandMap");
 				commandMapField.setAccessible(true);
 				commandMap = (SimpleCommandMap) commandMapField.get(Bukkit.getPluginManager());
-				
-				final Field knownCommandsField = SimpleCommandMap.class.getDeclaredField("knownCommands");
-				knownCommandsField.setAccessible(true);
-				cmKnownCommands = (Map<String, Command>) knownCommandsField.get(commandMap);
-				
+
 				try {
 					final Field aliasesField = SimpleCommandMap.class.getDeclaredField("aliases");
 					aliasesField.setAccessible(true);
@@ -483,14 +477,12 @@ public abstract class Commands {
 	
 	public static void registerCommand(final ScriptCommand command) {
 		if (commandMap != null) {
-			assert cmKnownCommands != null;// && cmAliases != null;
-			command.register(commandMap, cmKnownCommands, cmAliases);
+			command.register(commandMap, cmAliases);
 		}
 		commands.put(command.getLabel(), command);
 		for (final String alias : command.getActiveAliases()) {
 			commands.put(alias.toLowerCase(), command);
 		}
-		command.registerHelp();
 	}
 	
 	public static int unregisterCommands(final File script) {
@@ -500,7 +492,6 @@ public abstract class Commands {
 			final ScriptCommand c = commandsIter.next();
 			if (script.equals(c.getScript())) {
 				numCommands++;
-				c.unregisterHelp();
 				if (commandMap != null) {
 					assert cmKnownCommands != null;// && cmAliases != null;
 					c.unregister(commandMap, cmKnownCommands, cmAliases);

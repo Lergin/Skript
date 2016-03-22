@@ -23,10 +23,10 @@ package ch.njol.skript.lang;
 
 import java.util.Locale;
 
-import org.bukkit.event.Event;
 import org.eclipse.jdt.annotation.Nullable;
 
 import ch.njol.skript.SkriptAPIException;
+import org.spongepowered.api.event.Event;
 
 public final class SkriptEventInfo<E extends SkriptEvent> extends SyntaxElementInfo<E> {
 	

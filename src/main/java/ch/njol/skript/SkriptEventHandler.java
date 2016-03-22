@@ -22,6 +22,7 @@
 package ch.njol.skript;
 
 import java.io.File;
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -47,6 +48,9 @@ import ch.njol.skript.command.Commands;
 import ch.njol.skript.lang.SelfRegisteringSkriptEvent;
 import ch.njol.skript.lang.Trigger;
 import ch.njol.skript.lang.function.Functions;
+import org.spongepowered.api.event.Event;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.Order;
 
 /**
  * @author Peter Güttinger
@@ -251,7 +255,27 @@ public abstract class SkriptEventHandler {
 	 * Stores which events are currently registered with Bukkit
 	 */
 	private final static Set<Class<? extends Event>> registeredEvents = new HashSet<Class<? extends Event>>();
-	private final static Listener listener = new Listener() {};
+	private final static Listener listener = new Listener() {
+		@Override
+		public boolean beforeModifications() {
+			return false;
+		}
+
+		@Override
+		public Order order() {
+			return null;
+		}
+
+		/**
+		 * Returns the annotation type of this annotation.
+		 *
+		 * @return the annotation type of this annotation
+		 */
+		@Override
+		public Class<? extends Annotation> annotationType() {
+			return null;
+		}
+	};
 	
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	final static void registerBukkitEvents() {

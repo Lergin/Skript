@@ -23,7 +23,6 @@ package ch.njol.skript.command;
 
 import java.util.WeakHashMap;
 
-import org.bukkit.event.Event;
 import org.eclipse.jdt.annotation.Nullable;
 
 import ch.njol.skript.Skript;
@@ -38,6 +37,7 @@ import ch.njol.skript.log.RetainingLogHandler;
 import ch.njol.skript.log.SkriptLogger;
 import ch.njol.skript.util.Utils;
 import ch.njol.skript.variables.Variables;
+import org.spongepowered.api.event.Event;
 
 /**
  * Represents an argument of a command

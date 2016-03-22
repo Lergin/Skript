@@ -42,8 +42,6 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.events.XMLEvent;
 
 import org.apache.commons.lang.StringEscapeUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.command.CommandSender;
 import org.eclipse.jdt.annotation.Nullable;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -58,6 +56,8 @@ import ch.njol.skript.util.Task;
 import ch.njol.skript.util.Timespan;
 import ch.njol.skript.util.Version;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandSource;
 
 /**
  * @author Peter Güttinger
@@ -143,7 +143,7 @@ public final class Updater {
 			public void run() {
 				if (!SkriptConfig.checkForNewVersion.value())
 					return;
-				check(Bukkit.getConsoleSender(), SkriptConfig.automaticallyDownloadNewVersion.value(), true);
+				check(Sponge.getServer().getConsole(), SkriptConfig.automaticallyDownloadNewVersion.value(), true);
 				final Timespan t = SkriptConfig.updateCheckInterval.value();
 				if (t.getTicks_i() != 0)
 					setNextExecution(t.getTicks_i());
@@ -156,7 +156,7 @@ public final class Updater {
 	 * @param download Whether to directly download the newest version if one is found
 	 * @param isAutomatic
 	 */
-	static void check(final CommandSender sender, final boolean download, final boolean isAutomatic) {
+	static void check(final CommandSource sender, final boolean download, final boolean isAutomatic) {
 		stateLock.writeLock().lock();
 		try {
 			if (state == UpdateState.CHECK_IN_PROGRESS || state == UpdateState.DOWNLOAD_IN_PROGRESS)
@@ -269,7 +269,7 @@ public final class Updater {
 	 * 
 	 * @param sender
 	 */
-	final static void getChangelogs(final CommandSender sender) {
+	final static void getChangelogs(final CommandSource sender) {
 		InputStream in = null;
 		InputStreamReader r = null;
 		try {
@@ -350,7 +350,7 @@ public final class Updater {
 	 * @param sender
 	 * @param isAutomatic
 	 */
-	static void download_i(final CommandSender sender, final boolean isAutomatic) {
+	static void download_i(final CommandSource sender, final boolean isAutomatic) {
 		assert sender != null;
 		stateLock.readLock().lock();
 		try {
@@ -427,7 +427,7 @@ public final class Updater {
 	 * 
 	 * @param sender
 	 */
-	public static void download(final CommandSender sender, final boolean isAutomatic) {
+	public static void download(final CommandSource sender, final boolean isAutomatic) {
 		assert sender != null;
 		stateLock.writeLock().lock();
 		try {

@@ -21,28 +21,32 @@
 
 package ch.njol.skript.command;
 
+import ch.njol.skript.Skript;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.eclipse.jdt.annotation.Nullable;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.event.Event;
+import org.spongepowered.api.event.cause.Cause;
 
 /**
  * @author Peter Güttinger
  */
-public class CommandEvent extends Event {
+public class CommandEvent implements Event {
 	
-	private final CommandSender sender;
+	private final CommandSource sender;
 	private final String command;
 	@Nullable
 	private final String[] args;
 	
-	public CommandEvent(final CommandSender sender, final String command, final @Nullable String[] args) {
+	public CommandEvent(final CommandSource sender, final String command, final @Nullable String[] args) {
 		this.sender = sender;
 		this.command = command;
 		this.args = args;
 	}
 	
-	public CommandSender getSender() {
+	public CommandSource getSender() {
 		return sender;
 	}
 	
@@ -66,5 +70,9 @@ public class CommandEvent extends Event {
 	public static HandlerList getHandlerList() {
 		return handlers;
 	}
-	
+
+	@Override
+	public Cause getCause() {
+		return Cause.builder().owner(Skript.getInstance()).build();
+	}
 }

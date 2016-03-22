@@ -21,14 +21,15 @@
 
 package ch.njol.skript.expressions;
 
-import org.bukkit.entity.LivingEntity;
-
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.expressions.base.SimplePropertyExpression;
 import ch.njol.skript.util.Timespan;
+
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.entity.living.Living;
 
 /**
  * @author Peter Güttinger
@@ -38,7 +39,7 @@ import ch.njol.skript.util.Timespan;
 @Examples({"player's remaining air is less than 3 seconds:",
 		"	send \"hurry, get to the surface!\" to the player"})
 @Since("")
-public class ExprRemainingAir extends SimplePropertyExpression<LivingEntity, Timespan> {
+public class ExprRemainingAir extends SimplePropertyExpression<Living, Timespan> {
 	static {
 		register(ExprRemainingAir.class, Timespan.class, "remaining air", "livingentities");
 	}
@@ -54,8 +55,8 @@ public class ExprRemainingAir extends SimplePropertyExpression<LivingEntity, Tim
 	}
 	
 	@Override
-	public Timespan convert(final LivingEntity e) {
-		return Timespan.fromTicks(e.getRemainingAir());
+	public Timespan convert(final Living e) {
+		return Timespan.fromTicks_i(e.get(Keys.REMAINING_AIR).orElse(e.get(Keys.MAX_AIR).orElse(0)));
 	}
 	
 }

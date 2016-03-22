@@ -28,11 +28,12 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.logging.Level;
 
-import org.bukkit.Bukkit;
-import org.bukkit.command.CommandSender;
 import org.eclipse.jdt.annotation.Nullable;
 
 import ch.njol.skript.Skript;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.text.Text;
 
 /**
  * @author Peter Güttinger
@@ -105,12 +106,12 @@ public class RetainingLogHandler extends LogHandler {
 	 * @param def Error to send if no errors were logged, can be null to not print any error if there are none
 	 * @return Whether there were any errors to send
 	 */
-	public final boolean printErrors(final CommandSender recipient, final @Nullable String def) {
+	public final boolean printErrors(final CommandSource recipient, final @Nullable String def) {
 		assert !printedErrorOrLog;
 		printedErrorOrLog = true;
 		stop();
 		
-		final boolean console = recipient == Bukkit.getConsoleSender(); // log as SEVERE instead of INFO
+		final boolean console = recipient == Sponge.getServer().getConsole(); // log as SEVERE instead of INFO
 		
 		boolean hasError = false;
 		for (final LogEntry e : log) {
@@ -118,7 +119,7 @@ public class RetainingLogHandler extends LogHandler {
 				if (console)
 					SkriptLogger.LOGGER.severe(e.getMessage());
 				else
-					recipient.sendMessage(e.getMessage());
+					recipient.sendMessage(Text.of(e.getMessage()));
 				e.logged();
 				hasError = true;
 			} else {
@@ -130,7 +131,7 @@ public class RetainingLogHandler extends LogHandler {
 			if (console)
 				SkriptLogger.LOGGER.severe(def);
 			else
-				recipient.sendMessage(def);
+				recipient.sendMessage(Text.of(def));
 		}
 		return hasError;
 	}

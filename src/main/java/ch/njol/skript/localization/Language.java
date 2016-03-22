@@ -44,6 +44,7 @@ import ch.njol.skript.config.Config;
 import ch.njol.skript.util.ExceptionUtils;
 import ch.njol.skript.util.Version;
 import ch.njol.util.StringUtils;
+import org.spongepowered.api.plugin.PluginContainer;
 
 /**
  * @author Peter Güttinger
@@ -73,7 +74,7 @@ public class Language {
 	static HashMap<String, String> localized = null;
 	static boolean useLocal = false;
 	
-	private static HashMap<Plugin, Version> langVersion = new HashMap<Plugin, Version>();
+	private static HashMap<PluginContainer, Version> langVersion = new HashMap<PluginContainer, Version>();
 	
 	public static String getName() {
 		return useLocal ? name : "english";
@@ -181,27 +182,34 @@ public class Language {
 	public static void loadDefault(final SkriptAddon addon) {
 		if (addon.getLanguageFileDirectory() == null)
 			return;
-		final InputStream din = addon.plugin.getResource(addon.getLanguageFileDirectory() + "/english.lang");
-		if (din == null)
-			throw new IllegalStateException(addon + " is missing the required english.lang file!");
-		HashMap<String, String> en;
 		try {
-			en = new Config(din, "english.lang", false, false, ":").toMap(".");
-		} catch (final Exception e) {
-			throw Skript.exception(e, "Could not load " + addon + "'s default language file!");
-		} finally {
+			//todo: can this be done easier?
+			final InputStream din =
+					addon.plugin.getAsset(addon.getLanguageFileDirectory() + "/english.lang").get().getUrl().openStream();
+
+			if (din == null)
+				throw new IllegalStateException(addon + " is missing the required english.lang file!");
+			HashMap<String, String> en;
 			try {
-				din.close();
-			} catch (final IOException e) {}
+				en = new Config(din, "english.lang", false, false, ":").toMap(".");
+			} catch (final Exception e) {
+				throw Skript.exception(e, "Could not load " + addon + "'s default language file!");
+			} finally {
+				try {
+					din.close();
+				} catch (final IOException e) {}
+			}
+			final String v = en.get("version");
+			if (v == null)
+				Skript.warning("Missing version in english.lang");
+			langVersion.put(addon.plugin, v == null ? Skript.getVersion() : new Version(v));
+			en.remove("version");
+			english.putAll(en);
+			for (final LanguageChangeListener l : listeners)
+				l.onLanguageChange();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		final String v = en.get("version");
-		if (v == null)
-			Skript.warning("Missing version in english.lang");
-		langVersion.put(addon.plugin, v == null ? Skript.getVersion() : new Version(v));
-		en.remove("version");
-		english.putAll(en);
-		for (final LanguageChangeListener l : listeners)
-			l.onLanguageChange();
 	}
 	
 	public static boolean load(String name) {
@@ -231,36 +239,43 @@ public class Language {
 	private static boolean load(final SkriptAddon addon, final String name) {
 		if (addon.getLanguageFileDirectory() == null)
 			return false;
-		final HashMap<String, String> l = load(addon.plugin.getResource(addon.getLanguageFileDirectory() + "/" + name + ".lang"), name);
-		final File f = new File(addon.plugin.getDataFolder(), addon.getLanguageFileDirectory() + File.separator + name + ".lang");
+		final HashMap<String, String> l;
 		try {
-			if (f.exists())
-				l.putAll(load(new FileInputStream(f), name));
-		} catch (final FileNotFoundException e) {
+			l = load(addon.plugin.getAsset(addon.getLanguageFileDirectory() + "/" + name + ".lang").get().getUrl().openStream(), name);
+			final File f = new File(addon.plugin.getAssetDirectory().get().toFile(), addon.getLanguageFileDirectory() + File.separator + name + ".lang");
+			try {
+				if (f.exists())
+					l.putAll(load(new FileInputStream(f), name));
+			} catch (final FileNotFoundException e) {
+				assert false;
+			}
+			if (l.isEmpty())
+				return false;
+			if (!l.containsKey("version")) {
+				Skript.error(addon + "'s language file " + name + ".lang does not provide a version number!");
+			} else {
+				try {
+					final Version v = new Version("" + l.get("version"));
+					final Version lv = langVersion.get(addon.plugin);
+					assert lv != null; // set in loadDefault()
+					if (v.isSmallerThan(lv))
+						Skript.warning(addon + "'s language file " + name + ".lang is outdated, some messages will be english.");
+				} catch (final IllegalArgumentException e) {
+					Skript.error("Illegal version syntax in " + addon + "'s language file " + name + ".lang: " + e.getLocalizedMessage());
+				}
+			}
+			l.remove("version");
+			final HashMap<String, String> loc = localized;
+			if (loc != null)
+				loc.putAll(l);
+			else
+				assert false : addon + "; " + name;
+			return true;
+		} catch (final IOException e) {
 			assert false;
 		}
-		if (l.isEmpty())
-			return false;
-		if (!l.containsKey("version")) {
-			Skript.error(addon + "'s language file " + name + ".lang does not provide a version number!");
-		} else {
-			try {
-				final Version v = new Version("" + l.get("version"));
-				final Version lv = langVersion.get(addon.plugin);
-				assert lv != null; // set in loadDefault()
-				if (v.isSmallerThan(lv))
-					Skript.warning(addon + "'s language file " + name + ".lang is outdated, some messages will be english.");
-			} catch (final IllegalArgumentException e) {
-				Skript.error("Illegal version syntax in " + addon + "'s language file " + name + ".lang: " + e.getLocalizedMessage());
-			}
-		}
-		l.remove("version");
-		final HashMap<String, String> loc = localized;
-		if (loc != null)
-			loc.putAll(l);
-		else
-			assert false : addon + "; " + name;
-		return true;
+
+		return false;
 	}
 	
 	private static HashMap<String, String> load(final @Nullable InputStream in, final String name) {

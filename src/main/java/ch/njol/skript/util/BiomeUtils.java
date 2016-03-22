@@ -27,6 +27,7 @@ import org.eclipse.jdt.annotation.Nullable;
 /**
  * @author Peter Güttinger
  */
+//TODO: replace with catalog Type?
 public abstract class BiomeUtils {
 	private BiomeUtils() {}
 	

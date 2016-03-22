@@ -24,8 +24,8 @@ package ch.njol.skript.lang;
 import java.io.File;
 import java.util.List;
 
-import org.bukkit.event.Event;
 import org.eclipse.jdt.annotation.Nullable;
+import org.spongepowered.api.event.Event;
 
 /**
  * @author Peter Güttinger

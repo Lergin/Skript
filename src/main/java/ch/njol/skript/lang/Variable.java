@@ -32,11 +32,6 @@ import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.TreeMap;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -63,50 +58,52 @@ import ch.njol.util.Pair;
 import ch.njol.util.StringUtils;
 import ch.njol.util.coll.CollectionUtils;
 import ch.njol.util.coll.iterator.EmptyIterator;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.Event;
 
 /**
  * @author Peter Güttinger
  */
 public class Variable<T> implements Expression<T> {
-	
+
 	public final static String SEPARATOR = "::";
 	public final static String LOCAL_VARIABLE_TOKEN = "_";
-	
+
 	/**
 	 * The name of this variable, excluding the local variable token, but including the list variable token '::*'.
 	 */
 	private final VariableString name;
-	
+
 	private final Class<T> superType;
 	final Class<? extends T>[] types;
-	
+
 	final boolean local;
 	private final boolean list;
-	
+
 	@Nullable
 	private final Variable<?> source;
-	
+
 	@SuppressWarnings("unchecked")
 	private Variable(final VariableString name, final Class<? extends T>[] types, final boolean local, final boolean list, final @Nullable Variable<?> source) {
 		assert name != null;
 		assert types != null && types.length > 0;
-		
+
 		assert name.isSimple() || name.getMode() == StringMode.VARIABLE_NAME;
-		
+
 		this.local = local;
 		this.list = list;
-		
+
 		this.name = name;
-		
+
 		this.types = types;
 		this.superType = (Class<T>) Utils.getSuperType(types);
-		
+
 		this.source = source;
 	}
-	
+
 	/**
 	 * Checks whether a string is a valid variable name. This is used to verify variable names as well as command and function arguments.
-	 * 
+	 *
 	 * @param name The name to test
 	 * @param allowListVariable Whether to allow a list variable
 	 * @param printErrors Whether to print errors when they are encountered
@@ -137,7 +134,7 @@ public class Variable<T> implements Expression<T> {
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Prints errors
 	 */
@@ -155,47 +152,47 @@ public class Variable<T> implements Expression<T> {
 			return null;
 		return new Variable<T>(vs, types, name.startsWith(LOCAL_VARIABLE_TOKEN), name.endsWith(SEPARATOR + "*"), null);
 	}
-	
+
 	@Override
 	public boolean init(final Expression<?>[] exprs, final int matchedPattern, final Kleenean isDelayed, final ParseResult parseResult) {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	public boolean isLocal() {
 		return local;
 	}
-	
+
 	public boolean isList() {
 		return list;
 	}
-	
+
 	@Override
 	public boolean isSingle() {
 		return !list;
 	}
-	
+
 	@Override
 	public Class<? extends T> getReturnType() {
 		return superType;
 	}
-	
+
 	@Override
 	public String toString(final @Nullable Event e, final boolean debug) {
 		if (e != null)
 			return Classes.toString(get(e));
 		return "{" + (local ? "_" : "") + StringUtils.substring(name.toString(e, debug), 1, -1) + "}" + (debug ? "(as " + superType.getName() + ")" : "");
 	}
-	
+
 	@Override
 	public String toString() {
 		return toString(null, false);
 	}
-	
+
 	@Override
 	public <R> Variable<R> getConvertedExpression(final Class<R>... to) {
 		return new Variable<R>(name, to, local, list, this);
 	}
-	
+
 	/**
 	 * Gets the value of this variable as stored in the variables map.
 	 */
@@ -209,7 +206,7 @@ public class Variable<T> implements Expression<T> {
 			return Variables.getVariable((local ? LOCAL_VARIABLE_TOKEN : "") + name.getDefaultVariableName().toLowerCase(Locale.ENGLISH), e, false);
 		return val;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Nullable
 	private Object get(final Event e) {
@@ -226,33 +223,35 @@ public class Variable<T> implements Expression<T> {
 				if (v.getValue() instanceof Map)
 					o = ((Map<String, ?>) v.getValue()).get(null);
 				else
-					o = v.getValue();	
+					o = v.getValue();
 				l.add(convertIfOldPlayer(name + v.getKey(), e, o));
 			}
 		}
 		return l.toArray();
 	}
-	
-	private final static boolean uuidSupported = Skript.methodExists(OfflinePlayer.class, "getUniqueId");
-	
+
+	private final static boolean uuidSupported = true;//Skript.methodExists(OfflinePlayer.class, "getUniqueId");
+
 	/*
-	 * Workaround for player variables when a player has left and rejoined 
+	 * Workaround for player variables when a player has left and rejoined
 	 * because the player object inside the variable will be a (kinda) dead variable
 	 * as a new player object has been created by the server.
 	 */
+
+	//todo: is this needed with sponge???
 	@SuppressWarnings({"deprecation"})
 	@Nullable Object convertIfOldPlayer(String key, Event event, @Nullable Object t){
-		if(SkriptConfig.enablePlayerVariableFix.value() && t != null && t instanceof Player){
+		if(false && SkriptConfig.enablePlayerVariableFix.value() && t != null && t instanceof Player){
 			Player p = (Player) t;
-			if(!p.isValid() && p.isOnline()){
+			/*if(!p.isValid() && p.isOnline()){
 				Player player = uuidSupported ? Bukkit.getPlayer(p.getUniqueId()) : Bukkit.getPlayerExact(p.getName());
 				Variables.setVariable(key, player, event, local);
 				return player;
-			}
+			}*/
 		}
 		return t;
 	}
-	
+
 	public Iterator<Pair<String, Object>> variablesIterator(final Event e) {
 		if (!list)
 			throw new SkriptAPIException("Looping a non-list variable");
@@ -269,7 +268,7 @@ public class Variable<T> implements Expression<T> {
 			private String key;
 			@Nullable
 			private Object next = null;
-			
+
 			@Override
 			public boolean hasNext() {
 				if (next != null)
@@ -285,7 +284,7 @@ public class Variable<T> implements Expression<T> {
 				next = null;
 				return false;
 			}
-			
+
 			@Override
 			public Pair<String, Object> next() {
 				if (!hasNext())
@@ -294,14 +293,14 @@ public class Variable<T> implements Expression<T> {
 				next = null;
 				return n;
 			}
-			
+
 			@Override
 			public void remove() {
 				throw new UnsupportedOperationException();
 			}
 		};
 	}
-	
+
 	@Override
 	public Iterator<T> iterator(final Event e) {
 		if (!list)
@@ -319,7 +318,7 @@ public class Variable<T> implements Expression<T> {
 			private String key;
 			@Nullable
 			private T next = null;
-			
+
 			@SuppressWarnings({"unchecked"})
 			@Override
 			public boolean hasNext() {
@@ -337,7 +336,7 @@ public class Variable<T> implements Expression<T> {
 				next = null;
 				return false;
 			}
-			
+
 			@Override
 			public T next() {
 				if (!hasNext())
@@ -347,36 +346,36 @@ public class Variable<T> implements Expression<T> {
 				next = null;
 				return n;
 			}
-			
+
 			@Override
 			public void remove() {
 				throw new UnsupportedOperationException();
 			}
 		};
 	}
-	
+
 	@Nullable
 	private T getConverted(final Event e) {
 		assert !list;
 		return Converters.convert(get(e), types);
 	}
-	
+
 	private T[] getConvertedArray(final Event e) {
 		assert list;
 		return Converters.convertArray((Object[]) get(e), types, superType);
 	}
-	
+
 	private final void set(final Event e, final @Nullable Object value) {
 		Variables.setVariable("" + name.toString(e).toLowerCase(Locale.ENGLISH), value, e, local);
 	}
-	
+
 	private final void setIndex(final Event e, final String index, final @Nullable Object value) {
 		assert list;
 		final String s = name.toString(e).toLowerCase(Locale.ENGLISH);
 		assert s.endsWith("::*") : s + "; " + name;
 		Variables.setVariable(s.substring(0, s.length() - 1) + index.toLowerCase(Locale.ENGLISH), value, e, local);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public Class<?>[] acceptChange(final ChangeMode mode) {
@@ -384,7 +383,7 @@ public class Variable<T> implements Expression<T> {
 			return CollectionUtils.array(Object.class);
 		return CollectionUtils.array(Object[].class);
 	}
-	
+
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Override
 	public void change(final Event e, final @Nullable Object[] delta, final ChangeMode mode) throws UnsupportedOperationException {
@@ -407,13 +406,14 @@ public class Variable<T> implements Expression<T> {
 						i++;
 					}
 				} else {
+					//todo test if this bug realy isn't ha
 					//Mirre Start, Location bug quickfix.
-					if(delta[0] instanceof Location){
+					/*if(delta[0] instanceof Location){
 						set(e, ((Location)delta[0]).clone());
-					}else
+					}else*/
 						set(e, delta[0]);
 					//Mirre End
-					
+
 					//Perhaps clone all delta[0]'s that are implementing Cloneable(Location for example)? Possible problems?
 				}
 				break;
@@ -523,26 +523,26 @@ public class Variable<T> implements Expression<T> {
 					} else if ((changer = ci.getChanger()) != null && (cs = changer.acceptChange(mode)) != null) {
 						final Object[] one = (Object[]) Array.newInstance(o.getClass(), 1);
 						one[0] = o;
-						
+
 						final Class<?>[] cs2 = new Class<?>[cs.length];
 						for (int i = 0; i < cs.length; i++)
 							cs2[i] = cs[i].isArray() ? cs[i].getComponentType() : cs[i];
-						
+
 						final ArrayList<Object> l = new ArrayList<Object>();
 						for (final Object d : delta) {
 							final Object d2 = Converters.convert(d, cs2);
 							if (d2 != null)
 								l.add(d2);
 						}
-						
+
 						ChangerUtils.change(changer, one, l.toArray(), mode);
-						
+
 					}
 				}
 				break;
 		}
 	}
-	
+
 	@Override
 	@Nullable
 	public T getSingle(final Event e) {
@@ -550,12 +550,12 @@ public class Variable<T> implements Expression<T> {
 			throw new SkriptAPIException("Invalid call to getSingle");
 		return getConverted(e);
 	}
-	
+
 	@Override
 	public T[] getArray(final Event e) {
 		return getAll(e);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public T[] getAll(final Event e) {
@@ -571,21 +571,21 @@ public class Variable<T> implements Expression<T> {
 		one[0] = o;
 		return one;
 	}
-	
+
 	@Override
 	public boolean isLoopOf(final String s) {
 		return s.equalsIgnoreCase("var") || s.equalsIgnoreCase("variable") || s.equalsIgnoreCase("value") || s.equalsIgnoreCase("index");
 	}
-	
+
 	public boolean isIndexLoop(final String s) {
 		return s.equalsIgnoreCase("index");
 	}
-	
+
 	@Override
 	public boolean check(final Event e, final Checker<? super T> c, final boolean negated) {
 		return SimpleExpression.check(getAll(e), c, negated, getAnd());
 	}
-	
+
 	@Override
 	public boolean check(final Event e, final Checker<? super T> c) {
 		return SimpleExpression.check(getAll(e), c, false, getAnd());

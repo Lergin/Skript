@@ -32,7 +32,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 
-import org.bukkit.event.Event;
 import org.eclipse.jdt.annotation.Nullable;
 
 import ch.njol.skript.aliases.Aliases;
@@ -82,6 +81,7 @@ import ch.njol.util.Kleenean;
 import ch.njol.util.NonNullPair;
 import ch.njol.util.StringUtils;
 import ch.njol.util.coll.CollectionUtils;
+import org.spongepowered.api.event.Event;
 
 /**
  * @author Peter Güttinger

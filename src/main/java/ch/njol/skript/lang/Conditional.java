@@ -21,10 +21,10 @@
 
 package ch.njol.skript.lang;
 
-import org.bukkit.event.Event;
 import org.eclipse.jdt.annotation.Nullable;
 
 import ch.njol.skript.config.SectionNode;
+import org.spongepowered.api.event.Event;
 
 /**
  * Represents a conditional trigger section.

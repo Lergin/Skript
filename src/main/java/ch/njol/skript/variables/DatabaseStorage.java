@@ -35,8 +35,6 @@ import lib.PatPeter.SQLibrary.MySQL;
 import lib.PatPeter.SQLibrary.SQLibrary;
 import lib.PatPeter.SQLibrary.SQLite;
 
-import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
 import org.eclipse.jdt.annotation.Nullable;
 
 import ch.njol.skript.Skript;
@@ -48,6 +46,7 @@ import ch.njol.skript.registrations.Classes;
 import ch.njol.skript.util.Task;
 import ch.njol.skript.util.Timespan;
 import ch.njol.util.SynchronizedReference;
+import org.spongepowered.api.Sponge;
 
 /**
  * TODO create a metadata table to store some properties (e.g. Skript version, Yggdrasil version) -- but what if some variables cannot be converted? move them to a different table?
@@ -142,7 +141,7 @@ public class DatabaseStorage extends VariablesStorage {
 	@Override
 	protected boolean load_i(final SectionNode n) {
 		synchronized (db) {
-			final Plugin p = Bukkit.getPluginManager().getPlugin("SQLibrary");
+			final Object p = Sponge.getPluginManager().getPlugin("SQLibrary");
 			if (p == null || !(p instanceof SQLibrary)) {
 				Skript.error("You need the plugin SQLibrary in order to use a database with Skript. You can download the latest version from http://dev.bukkit.org/server-mods/sqlibrary/files/");
 				return false;

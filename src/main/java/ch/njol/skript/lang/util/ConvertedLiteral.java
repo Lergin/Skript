@@ -23,7 +23,6 @@ package ch.njol.skript.lang.util;
 
 import java.util.Iterator;
 
-import org.bukkit.event.Event;
 import org.eclipse.jdt.annotation.Nullable;
 
 import ch.njol.skript.SkriptAPIException;
@@ -34,6 +33,7 @@ import ch.njol.skript.registrations.Converters;
 import ch.njol.util.Checker;
 import ch.njol.util.coll.CollectionUtils;
 import ch.njol.util.coll.iterator.ArrayIterator;
+import org.spongepowered.api.event.Event;
 
 /**
  * @author Peter Güttinger

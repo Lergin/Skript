@@ -32,6 +32,7 @@ import ch.njol.skript.lang.function.Functions.FunctionData;
 import ch.njol.skript.lang.util.SimpleEvent;
 import ch.njol.skript.variables.Variables;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.spongepowered.api.event.Event;
 
 /**
  * @author Peter Güttinger
@@ -75,7 +76,7 @@ public class ScriptFunction<T> extends Function<T> {
 	// REM: use patterns, e.g. {_a%b%} is like "a.*", and thus subsequent {_axyz} may be set and of that type.
 	@Override
 	@Nullable
-	public T[] execute(final FunctionEvent e, final Object[][] params) {
+	public T[] execute(final Event e, final Object[][] params) {
 		for (int i = 0; i < parameters.length; i++) {
 			final Parameter<?> p = parameters[i];
 			final Object[] val = params[i];

@@ -22,11 +22,11 @@
 package ch.njol.skript.util;
 
 import org.bukkit.event.Event;
-import org.bukkit.inventory.ItemStack;
 import org.eclipse.jdt.annotation.Nullable;
 
 import ch.njol.skript.lang.Debuggable;
 import ch.njol.skript.registrations.Classes;
+import org.spongepowered.api.item.inventory.ItemStack;
 
 /**
  * Represents a container for a single item. This can e.g. be an inventory slot or an item frame. // TODO actually make an item frame slot

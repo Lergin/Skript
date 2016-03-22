@@ -24,52 +24,65 @@ package ch.njol.skript.util;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.regex.Pattern;
 
-import org.bukkit.Location;
-import org.bukkit.TreeType;
-import org.bukkit.block.Block;
 import org.eclipse.jdt.annotation.Nullable;
 
 import ch.njol.skript.localization.Language;
 import ch.njol.skript.localization.LanguageChangeListener;
 import ch.njol.skript.localization.Noun;
 import ch.njol.util.coll.CollectionUtils;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.gen.PopulatorObject;
+import org.spongepowered.api.world.gen.PopulatorObjects;
 
 /**
  * @author Peter Güttinger
  */
 public enum StructureType {
-	TREE(TreeType.TREE, TreeType.BIG_TREE, TreeType.REDWOOD, TreeType.TALL_REDWOOD, TreeType.SMALL_JUNGLE, TreeType.JUNGLE, TreeType.SWAMP),
+	TREE(PopulatorObjects.OAK, PopulatorObjects.MEGA_OAK, PopulatorObjects.TALL_TAIGA,
+			PopulatorObjects.MEGA_POINTY_TAIGA, PopulatorObjects.MEGA_TALL_TAIGA, PopulatorObjects.POINTY_TAIGA,
+			PopulatorObjects.JUNGLE, PopulatorObjects.JUNGLE_BUSH, PopulatorObjects.MEGA_JUNGLE,
+			PopulatorObjects.BIRCH, PopulatorObjects.MEGA_BIRCH, PopulatorObjects.SWAMP, PopulatorObjects.SAVANNA),
 	
-	REGULAR(TreeType.TREE, TreeType.BIG_TREE), SMALL_REGULAR(TreeType.TREE), BIG_REGULAR(TreeType.BIG_TREE),
-	REDWOOD(TreeType.REDWOOD, TreeType.TALL_REDWOOD), SMALL_REDWOOD(TreeType.REDWOOD), BIG_REDWOOD(TreeType.TALL_REDWOOD),
-	JUNGLE(TreeType.SMALL_JUNGLE, TreeType.JUNGLE), SMALL_JUNGLE(TreeType.SMALL_JUNGLE), BIG_JUNGLE(TreeType.JUNGLE),
-	JUNGLE_BUSH(TreeType.JUNGLE_BUSH),
-	SWAMP(TreeType.SWAMP),
+	REGULAR(PopulatorObjects.OAK, PopulatorObjects.MEGA_OAK), SMALL_REGULAR(PopulatorObjects.OAK),
+	BIG_REGULAR(PopulatorObjects.MEGA_OAK),
+	REDWOOD(PopulatorObjects.TALL_TAIGA, PopulatorObjects.POINTY_TAIGA), SMALL_REDWOOD(PopulatorObjects.POINTY_TAIGA),
+	BIG_REDWOOD(PopulatorObjects.TALL_TAIGA),
+	JUNGLE(PopulatorObjects.JUNGLE, PopulatorObjects.MEGA_JUNGLE), SMALL_JUNGLE(PopulatorObjects.JUNGLE),
+	BIG_JUNGLE(PopulatorObjects.MEGA_JUNGLE), JUNGLE_BUSH(PopulatorObjects.JUNGLE_BUSH),
+	SWAMP(PopulatorObjects.SWAMP),
+
+	//todo: savanna, megaTaiga, non trees
 	
-	MUSHROOM(TreeType.RED_MUSHROOM, TreeType.BROWN_MUSHROOM),
-	RED_MUSHROOM(TreeType.RED_MUSHROOM), BROWN_MUSHROOM(TreeType.BROWN_MUSHROOM),
+	MUSHROOM(PopulatorObjects.RED, PopulatorObjects.BROWN),
+	RED_MUSHROOM(PopulatorObjects.RED), BROWN_MUSHROOM(PopulatorObjects.BROWN),
 	
 	;
 	
 	private Noun name;
-	private final TreeType[] types;
+	private final PopulatorObject[] types;
 	
-	private StructureType(final TreeType... types) {
+	private StructureType(final PopulatorObject... types) {
 		this.types = types;
 		name = new Noun("tree types." + name() + ".name");
 	}
 	
-	public void grow(final Location loc) {
-		loc.getWorld().generateTree(loc, CollectionUtils.getRandom(types));
+	public void grow(final Location<World> loc) {
+		PopulatorObject pop = CollectionUtils.getRandom(types);
+
+		if(pop.canPlaceAt(loc.getExtent(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()))
+			pop.placeObject(loc.getExtent(), new Random(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
 	}
 	
-	public void grow(final Block b) {
-		b.getWorld().generateTree(b.getLocation(), CollectionUtils.getRandom(types));
+	public void grow(final BlockSnapshot b) {
+		grow(b.getLocation().get());
 	}
 	
-	public TreeType[] getTypes() {
+	public PopulatorObject[] getTypes() {
 		return types;
 	}
 	
@@ -86,7 +99,7 @@ public enum StructureType {
 		return name;
 	}
 	
-	public boolean is(final TreeType type) {
+	public boolean is(final PopulatorObject type) {
 		return CollectionUtils.contains(types, type);
 	}
 	

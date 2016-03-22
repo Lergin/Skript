@@ -24,7 +24,6 @@ package ch.njol.skript.lang.util;
 import java.lang.reflect.Array;
 import java.util.Iterator;
 
-import org.bukkit.event.Event;
 import org.eclipse.jdt.annotation.Nullable;
 
 import ch.njol.skript.ScriptLoader;
@@ -42,6 +41,7 @@ import ch.njol.util.Checker;
 import ch.njol.util.Kleenean;
 import ch.njol.util.coll.CollectionUtils;
 import ch.njol.util.coll.iterator.ArrayIterator;
+import org.spongepowered.api.event.Event;
 
 /**
  * An implementation of the {@link Expression} interface. You should usually extend this class to make a new expression.

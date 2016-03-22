@@ -21,11 +21,15 @@
 
 package ch.njol.skript.entity;
 
-import org.bukkit.entity.Wolf;
 import org.eclipse.jdt.annotation.Nullable;
 
 import ch.njol.skript.lang.Literal;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.entity.living.animal.Wolf;
+
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * @author Peter Güttinger
@@ -52,17 +56,18 @@ public class WolfData extends EntityData<Wolf> {
 	
 	@Override
 	protected boolean init(final @Nullable Class<? extends Wolf> c, final @Nullable Wolf e) {
-		angry = e == null ? 0 : e.isAngry() ? 1 : -1;
-		tamed = e == null ? 0 : e.isTamed() ? 1 : -1;
+		angry = e == null ? 0 : isAngry(e) ? 1 : -1;
+		tamed = e == null ? 0 : isTamed(e) ? 1 : -1;
 		return true;
 	}
 	
 	@Override
 	public void set(final Wolf entity) {
 		if (angry != 0)
-			entity.setAngry(angry == 1);
+			entity.offer(Keys.ANGRY, angry == 1);
+		//really more a hack than what it should be....
 		if (tamed != 0)
-			entity.setTamed(tamed == 1);
+			entity.offer(Keys.TAMED_OWNER, tamed == 1 ? Optional.of(UUID.randomUUID()) : Optional.<UUID>empty());
 //		if (owner != null) {
 //			if (owner.isEmpty())
 //				entity.setOwner(null);
@@ -73,7 +78,7 @@ public class WolfData extends EntityData<Wolf> {
 	
 	@Override
 	public boolean match(final Wolf entity) {
-		return (angry == 0 || entity.isAngry() == (angry == 1)) && (tamed == 0 || entity.isTamed() == (tamed == 1));
+		return (angry == 0 || isAngry(entity) == (angry == 1)) && (tamed == 0 || isTamed(entity) == (tamed == 1));
 //				&& (owner == null || owner.isEmpty() && entity.getOwner() == null || entity.getOwner() != null && entity.getOwner().getName().equalsIgnoreCase(owner));
 	}
 	
@@ -129,5 +134,12 @@ public class WolfData extends EntityData<Wolf> {
 	public EntityData getSuperType() {
 		return new WolfData();
 	}
-	
+
+	private static boolean isAngry(Wolf e) {
+		return e.get(Keys.ANGRY).orElse(false);
+	}
+
+	private static boolean isTamed(Wolf e) {
+		return e.get(Keys.TAMED_OWNER).isPresent();
+	}
 }

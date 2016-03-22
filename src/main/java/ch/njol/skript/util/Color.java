@@ -32,57 +32,60 @@ import ch.njol.skript.localization.Adjective;
 import ch.njol.skript.localization.Language;
 import ch.njol.skript.localization.LanguageChangeListener;
 import ch.njol.yggdrasil.YggdrasilSerializable;
+import org.spongepowered.api.text.format.TextColor;
+import org.spongepowered.api.text.format.TextColors;
 
 /**
  * @author Peter Güttinger
  */
 @SuppressWarnings({"deprecation", "null"})
 public enum Color implements YggdrasilSerializable {
-	
-	BLACK(DyeColor.BLACK, ChatColor.BLACK, org.bukkit.Color.fromRGB(0x191919)),
-	DARK_GREY(DyeColor.GRAY, ChatColor.DARK_GRAY, org.bukkit.Color.fromRGB(0x4C4C4C)),
-	LIGHT_GREY(DyeColor.SILVER, ChatColor.GRAY, org.bukkit.Color.fromRGB(0x999999)),
-	WHITE(DyeColor.WHITE, ChatColor.WHITE, org.bukkit.Color.fromRGB(0xFFFFFF)),
-	
-	DARK_BLUE(DyeColor.BLUE, ChatColor.DARK_BLUE, org.bukkit.Color.fromRGB(0x334CB2)),
-	BROWN(DyeColor.BROWN, ChatColor.BLUE, org.bukkit.Color.fromRGB(0x664C33)),
-	DARK_CYAN(DyeColor.CYAN, ChatColor.DARK_AQUA, org.bukkit.Color.fromRGB(0x4C7F99)),
-	LIGHT_CYAN(DyeColor.LIGHT_BLUE, ChatColor.AQUA, org.bukkit.Color.fromRGB(0x6699D8)),
-	
-	DARK_GREEN(DyeColor.GREEN, ChatColor.DARK_GREEN, org.bukkit.Color.fromRGB(0x667F33)),
-	LIGHT_GREEN(DyeColor.LIME, ChatColor.GREEN, org.bukkit.Color.fromRGB(0x7FCC19)),
-	
-	YELLOW(DyeColor.YELLOW, ChatColor.YELLOW, org.bukkit.Color.fromRGB(0xE5E533)),
-	ORANGE(DyeColor.ORANGE, ChatColor.GOLD, org.bukkit.Color.fromRGB(0xD87F33)),
-	
-	DARK_RED(DyeColor.RED, ChatColor.DARK_RED, org.bukkit.Color.fromRGB(0x993333)),
-	LIGHT_RED(DyeColor.PINK, ChatColor.RED, org.bukkit.Color.fromRGB(0xF27FA5)),
-	
-	DARK_PURPLE(DyeColor.PURPLE, ChatColor.DARK_PURPLE, org.bukkit.Color.fromRGB(0x7F3FB2)),
-	LIGHT_PURPLE(DyeColor.MAGENTA, ChatColor.LIGHT_PURPLE, org.bukkit.Color.fromRGB(0xB24CD8));
-	
+
+	//TODO: to from wool data via datamanipulator
+	BLACK(org.spongepowered.api.util.Color.BLACK, TextColors.BLACK, org.spongepowered.api.util.Color.ofRgb(0x191919)),
+	DARK_GREY(org.spongepowered.api.util.Color.GRAY, TextColors.DARK_GRAY, org.spongepowered.api.util.Color.ofRgb(0x4C4C4C)),
+	LIGHT_GREY(org.spongepowered.api.util.Color.DARK_MAGENTA, TextColors.GRAY, org.spongepowered.api.util.Color.ofRgb(0x999999)),//color maybe wrong
+	WHITE(org.spongepowered.api.util.Color.WHITE, TextColors.WHITE, org.spongepowered.api.util.Color.ofRgb(0xFFFFFF)),
+
+	DARK_BLUE(org.spongepowered.api.util.Color.BLUE, TextColors.DARK_BLUE, org.spongepowered.api.util.Color.ofRgb(0x334CB2)),
+	BROWN(org.spongepowered.api.util.Color.DARK_GREEN, TextColors.BLUE, org.spongepowered.api.util.Color.ofRgb(0x664C33)),//color maybe wrong
+	DARK_CYAN(org.spongepowered.api.util.Color.DARK_CYAN, TextColors.DARK_AQUA, org.spongepowered.api.util.Color.ofRgb(0x4C7F99)),//color maybe wrong
+	LIGHT_CYAN(org.spongepowered.api.util.Color.CYAN, TextColors.AQUA, org.spongepowered.api.util.Color.ofRgb(0x6699D8)),//color maybe wrong
+
+	DARK_GREEN(org.spongepowered.api.util.Color.GREEN, TextColors.DARK_GREEN, org.spongepowered.api.util.Color.ofRgb(0x667F33)),
+	LIGHT_GREEN(org.spongepowered.api.util.Color.LIME, TextColors.GREEN, org.spongepowered.api.util.Color.ofRgb(0x7FCC19)),
+
+	YELLOW(org.spongepowered.api.util.Color.YELLOW, TextColors.YELLOW, org.spongepowered.api.util.Color.ofRgb(0xE5E533)),
+	ORANGE(org.spongepowered.api.util.Color.NAVY, TextColors.GOLD, org.spongepowered.api.util.Color.ofRgb(0xD87F33)),//Color maybe wrong
+
+	DARK_RED(org.spongepowered.api.util.Color.RED, TextColors.DARK_RED, org.spongepowered.api.util.Color.ofRgb(0x993333)),
+	LIGHT_RED(org.spongepowered.api.util.Color.PINK, TextColors.RED, org.spongepowered.api.util.Color.ofRgb(0xF27FA5)),
+
+	DARK_PURPLE(org.spongepowered.api.util.Color.PURPLE, TextColors.DARK_PURPLE, org.spongepowered.api.util.Color.ofRgb(0x7F3FB2)),
+	LIGHT_PURPLE(org.spongepowered.api.util.Color.MAGENTA, TextColors.LIGHT_PURPLE, org.spongepowered.api.util.Color.ofRgb(0xB24CD8));
+
 	private final static String LANGUAGE_NODE = "colors";
-	
-	private final DyeColor wool;
-	private final ChatColor chat;
-	private final org.bukkit.Color bukkit;
-	
+
+	private final org.spongepowered.api.util.Color wool;
+	private final TextColor chat;
+	private final org.spongepowered.api.util.Color bukkit;
+
 	@Nullable
 	Adjective adjective;
-	
-	private Color(final DyeColor wool, final ChatColor chat, final org.bukkit.Color bukkit) {
+
+	private Color(final org.spongepowered.api.util.Color wool, final TextColor chat, final org.spongepowered.api.util.Color bukkit) {
 		this.wool = wool;
 		this.chat = chat;
 		this.bukkit = bukkit;
 	}
-	
+
 	private final static Color[] byWool = new Color[16];
 	static {
 		for (final Color c : values()) {
 			byWool[c.wool.getData()] = c;
 		}
 	}
-	
+
 	final static Map<String, Color> byName = new HashMap<String, Color>();
 	final static Map<String, Color> byEnglishName = new HashMap<String, Color>();
 	static {
@@ -103,68 +106,68 @@ public enum Color implements YggdrasilSerializable {
 			}
 		});
 	}
-	
+
 	public byte getDye() {
 		return (byte) (15 - wool.getData());
 	}
-	
-	public DyeColor getWoolColor() {
+
+	public org.spongepowered.api.util.Color getWoolColor() {
 		return wool;
 	}
-	
+
 	public byte getWool() {
 		return wool.getData();
 	}
-	
+
 	public String getChat() {
 		return "" + chat.toString();
 	}
-	
-	public ChatColor asChatColor() {
+
+	public TextColor asChatColor() {
 		return chat;
 	}
-	
+
 	// currently only used by SheepData
 	public Adjective getAdjective() {
 		return adjective;
 	}
-	
+
 	@Override
 	public String toString() {
 		final Adjective a = adjective;
 		return a == null ? "" + name() : a.toString(-1, 0);
 	}
-	
+
 	@Nullable
 	public final static Color byName(final String name) {
 		return byName.get(name.toLowerCase());
 	}
-	
+
 	@Nullable
 	public final static Color byEnglishName(final String name) {
 		return byEnglishName.get(name.toLowerCase());
 	}
-	
+
 	@Nullable
 	public final static Color byWool(final short data) {
 		if (data < 0 || data >= 16)
 			return null;
 		return byWool[data];
 	}
-	
+
 	@Nullable
 	public final static Color byDye(final short data) {
 		if (data < 0 || data >= 16)
 			return null;
 		return byWool[15 - data];
 	}
-	
-	public final static Color byWoolColor(final DyeColor color) {
+
+	public final static Color byWoolColor(final org.spongepowered.api.util.Color color) {
 		return byWool(color.getData());
 	}
-	
-	public final org.bukkit.Color getBukkitColor() {
+
+	public final org.spongepowered.api.util.Color getBukkitColor() {
 		return bukkit;
 	}
-	
+
 }

@@ -21,7 +21,8 @@
 
 package ch.njol.skript.lang;
 
-import org.bukkit.event.Event;
+
+import org.spongepowered.api.event.Event;
 
 /**
  * Effects which can be tested implement this interface.

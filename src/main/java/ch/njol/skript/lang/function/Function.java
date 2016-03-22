@@ -27,6 +27,7 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import ch.njol.skript.classes.ClassInfo;
 import ch.njol.util.coll.CollectionUtils;
+import org.spongepowered.api.event.Event;
 
 /**
  * @author Peter Güttinger
@@ -118,7 +119,7 @@ public abstract class Function<T> {
 	 * @return Whatever this function is supposed to return. May be null or empty, but must not contain null elements.
 	 */
 	@Nullable
-	public abstract T[] execute(FunctionEvent e, final Object[][] params);
+	public abstract T[] execute(Event e, final Object[][] params);
 	
 	@Override
 	public String toString() {

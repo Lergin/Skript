@@ -21,8 +21,8 @@
 
 package ch.njol.skript.command;
 
-import org.bukkit.command.CommandSender;
 import org.bukkit.event.HandlerList;
+import org.spongepowered.api.command.CommandSource;
 
 /**
  * @author Peter Güttinger
@@ -31,7 +31,7 @@ public class ScriptCommandEvent extends CommandEvent {
 	
 	private final ScriptCommand skriptCommand;
 	
-	public ScriptCommandEvent(final ScriptCommand command, final CommandSender sender) {
+	public ScriptCommandEvent(final ScriptCommand command, final CommandSource sender) {
 		super(sender, command.getLabel(), null);
 		skriptCommand = command;
 	}

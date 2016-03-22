@@ -17,28 +17,28 @@ import ch.njol.util.Closeable;
  */
 public abstract class Task implements Runnable, Closeable {
 	
-	private final Plugin plugin;
+	private final Object plugin;
 	private final boolean async;
 	private long period = -1;
 	
 	private int taskID = -1;
 	
-	public Task(final Plugin plugin, final long delay, final long period) {
+	public Task(final Object plugin, final long delay, final long period) {
 		this(plugin, delay, period, false);
 	}
 	
-	public Task(final Plugin plugin, final long delay, final long period, final boolean async) {
+	public Task(final Object plugin, final long delay, final long period, final boolean async) {
 		this.plugin = plugin;
 		this.period = period;
 		this.async = async;
 		schedule(delay);
 	}
 	
-	public Task(final Plugin plugin, final long delay) {
+	public Task(final Object plugin, final long delay) {
 		this(plugin, delay, false);
 	}
 	
-	public Task(final Plugin plugin, final long delay, final boolean async) {
+	public Task(final Object plugin, final long delay, final boolean async) {
 		this.plugin = plugin;
 		this.async = async;
 		schedule(delay);

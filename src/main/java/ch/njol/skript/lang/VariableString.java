@@ -56,6 +56,7 @@ import ch.njol.util.Kleenean;
 import ch.njol.util.StringUtils;
 import ch.njol.util.coll.CollectionUtils;
 import ch.njol.util.coll.iterator.SingleItemIterator;
+import org.spongepowered.api.event.Event;
 
 /**
  * Represents a string that may contain expressions, and is thus "variable".
@@ -388,7 +389,8 @@ public class VariableString implements Expression<String> {
 		}
 		return "" + b.toString();
 	}
-	
+
+	//todo
 	@Nullable
 	private final static ChatColor getLastColor(final CharSequence s) {
 		for (int i = s.length() - 2; i >= 0; i--) {

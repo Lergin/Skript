@@ -23,7 +23,6 @@ package ch.njol.skript.lang.util;
 
 import java.lang.reflect.Array;
 
-import org.bukkit.event.Event;
 import org.eclipse.jdt.annotation.Nullable;
 
 import ch.njol.skript.classes.Changer;
@@ -42,6 +41,7 @@ import ch.njol.util.Checker;
 import ch.njol.util.Kleenean;
 import ch.njol.util.coll.CollectionUtils;
 import ch.njol.util.coll.iterator.NonNullIterator;
+import org.spongepowered.api.event.Event;
 
 /**
  * Represents a literal, i.e. a static value like a number or a string.

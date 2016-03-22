@@ -48,6 +48,7 @@ import ch.njol.util.Kleenean;
 import ch.njol.util.StringUtils;
 import ch.njol.util.coll.iterator.SingleItemIterator;
 import ch.njol.yggdrasil.YggdrasilSerializable;
+import org.spongepowered.api.effect.particle.ParticleTypes;
 
 /**
  * @author Peter Güttinger
@@ -56,7 +57,8 @@ public final class VisualEffect implements SyntaxElement, YggdrasilSerializable 
 	private final static String LANGUAGE_NODE = "visual effects";
 	
 	private static enum Type implements YggdrasilSerializable {
-		ENDER_SIGNAL(Effect.ENDER_SIGNAL),
+		//todo what is the sponge ENDER_SIGNAL
+		//ENDER_SIGNAL(ParticleTypes.ENDER_SIGNAL),
 		MOBSPAWNER_FLAMES(Effect.MOBSPAWNER_FLAMES),
 		POTION_BREAK(Effect.POTION_BREAK) {
 			@Override

@@ -21,7 +21,7 @@
 
 package ch.njol.skript.lang;
 
-import org.bukkit.event.Event;
+import org.spongepowered.api.event.Event;
 
 /**
  * @author Peter Güttinger

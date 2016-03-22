@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.flowpowered.math.vector.Vector3d;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -63,6 +64,13 @@ import ch.njol.util.Kleenean;
 import ch.njol.util.coll.CollectionUtils;
 import ch.njol.yggdrasil.Fields;
 import ch.njol.yggdrasil.YggdrasilSerializable.YggdrasilExtendedSerializable;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.Ageable;
+import org.spongepowered.api.entity.living.monster.Zombie;
+import org.spongepowered.api.entity.living.monster.ZombiePigman;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 
 /**
  * @author Peter Güttinger
@@ -411,26 +419,27 @@ public abstract class EntityData<E extends Entity> implements SyntaxElement, Ygg
 	}
 	
 	@Nullable
-	public E spawn(final Location loc) {
+	public E spawn(final Location<World> loc) {
 		assert loc != null;
 		try {
-			final E e = loc.getWorld().spawn(loc, getType());
+			//todo: test creation
+			final E e = loc.getExtent().createEntity(getType(), Vector3d.ZERO).get();
 			if (e == null)
 				throw new IllegalArgumentException();
 			if (baby.isTrue()){
 				if(e instanceof Ageable)
-					((Ageable) e).setBaby();
+					((Ageable) e).getAgeData().baby().set(true);
 				else if(e instanceof Zombie)
-					((Zombie) e).setBaby(true);
-				else if(e instanceof PigZombie)
-					((PigZombie) e).setBaby(true);
+					((Zombie) e).getAgeData().baby().set(true);
+				else if(e instanceof ZombiePigman)
+					((ZombiePigman) e).getAgeData().baby().set(true);
 			}else if(baby.isFalse()){
 				if(e instanceof Ageable)
-					((Ageable) e).setAdult();
+					((Ageable) e).getAgeData().baby().set(false);
 				else if(e instanceof Zombie)
-					((Zombie) e).setBaby(false);
-				else if(e instanceof PigZombie)
-					((PigZombie) e).setBaby(false);
+					((Zombie) e).getAgeData().baby().set(false);
+				else if(e instanceof ZombiePigman)
+					((ZombiePigman) e).getAgeData().baby().set(false);
 			}
 			set(e);
 			return e;

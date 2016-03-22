@@ -37,35 +37,37 @@ import ch.njol.skript.localization.Language;
 import ch.njol.skript.util.Utils;
 import ch.njol.skript.util.Version;
 import ch.njol.util.coll.iterator.EnumerationIterable;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.plugin.PluginContainer;
 
 /**
- * Utility class for Skript addons. Use {@link Skript#registerAddon(JavaPlugin)} to create a SkriptAddon instance for your plugin.
+ * Utility class for Skript addons. Use {@link Skript#registerAddon(PluginContainer)} to create a SkriptAddon instance for your plugin.
  * 
  * @author Peter Güttinger
  */
 public final class SkriptAddon {
 	
-	public final JavaPlugin plugin;
+	public final PluginContainer plugin;
 	public final Version version;
 	private final String name;
 	
 	/**
-	 * Package-private constructor. Use {@link Skript#registerAddon(JavaPlugin)} to get a SkriptAddon for your plugin.
+	 * Package-private constructor. Use {@link Skript#registerAddon(PluginContainer)} to get a SkriptAddon for your plugin.
 	 * 
 	 * @param p
 	 */
-	SkriptAddon(final JavaPlugin p) {
+	SkriptAddon(final PluginContainer p) {
 		plugin = p;
-		name = "" + p.getName();
+		name = "" + plugin.getName();
 		Version v;
 		try {
-			v = new Version("" + p.getDescription().getVersion());
-		} catch (final IllegalArgumentException e) {
-			final Matcher m = Pattern.compile("(\\d+)(?:\\.(\\d+)(?:\\.(\\d+))?)?").matcher(p.getDescription().getVersion());
+			v = new Version("" + p.getVersion().get());
+		} catch (final IllegalArgumentException e) {//todo: do we really need this?
+			final Matcher m = Pattern.compile("(\\d+)(?:\\.(\\d+)(?:\\.(\\d+))?)?").matcher(p.getVersion().get());
 			if (!m.find())
-				throw new IllegalArgumentException("The version of the plugin " + p.getName() + " does not contain any numbers: " + p.getDescription().getVersion());
+				throw new IllegalArgumentException("The version of the plugin " + p.getName() + " does not contain any numbers: " + p.getVersion().get());
 			v = new Version(Utils.parseInt("" + m.group(1)), m.group(2) == null ? 0 : Utils.parseInt("" + m.group(2)), m.group(3) == null ? 0 : Utils.parseInt("" + m.group(3)));
-			Skript.warning("The plugin " + p.getName() + " uses a non-standard version syntax: '" + p.getDescription().getVersion() + "'. Skript will use " + v + " instead.");
+			Skript.warning("The plugin " + p.getName() + " uses a non-standard version syntax: '" + p.getVersion().get() + "'. Skript will use " + v + " instead.");
 		}
 		version = v;
 	}
@@ -163,7 +165,7 @@ public final class SkriptAddon {
 		if (file != null)
 			return file;
 		try {
-			final Method getFile = JavaPlugin.class.getDeclaredMethod("getFile");
+			final Method getFile = PluginContainer.class.getDeclaredMethod("getFile");//todo
 			getFile.setAccessible(true);
 			file = (File) getFile.invoke(plugin);
 			return file;

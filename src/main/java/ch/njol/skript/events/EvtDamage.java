@@ -35,6 +35,8 @@ import ch.njol.skript.entity.EntityData;
 import ch.njol.skript.lang.Literal;
 import ch.njol.skript.lang.SkriptEvent;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.entity.DamageEntityEvent;
 
 /**
  * @author Peter Güttinger
@@ -42,7 +44,7 @@ import ch.njol.skript.lang.SkriptParser.ParseResult;
 @SuppressWarnings("unchecked")
 public class EvtDamage extends SkriptEvent {
 	static {
-		Skript.registerEvent("Damage", EvtDamage.class, EntityDamageEvent.class, "damag(e|ing) [of %entitydata%]")
+		Skript.registerEvent("Damage", EvtDamage.class, DamageEntityEvent.class, "damag(e|ing) [of %entitydata%]")
 				.description("Called when an entity receives damage, e.g. by an attack from another entity, lava, fire, drowning, fall, suffocation, etc.")
 				.examples("on damage", "on damage of a player")
 				.since("1.0");
@@ -60,8 +62,8 @@ public class EvtDamage extends SkriptEvent {
 	@SuppressWarnings("null")
 	@Override
 	public boolean check(final Event evt) {
-		final EntityDamageEvent e = (EntityDamageEvent) evt;
-		if (!checkType(e.getEntity()))
+		final DamageEntityEvent e = (DamageEntityEvent) evt;
+		if (!checkType(e.getTargetEntity()))
 			return false;
 		if (e instanceof EntityDamageByEntityEvent && ((EntityDamageByEntityEvent) e).getDamager() instanceof EnderDragon && ((EntityDamageByEntityEvent) e).getEntity() instanceof EnderDragon)
 			return false;

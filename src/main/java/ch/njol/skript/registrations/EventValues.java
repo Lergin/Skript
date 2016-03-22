@@ -31,6 +31,7 @@ import ch.njol.skript.Skript;
 import ch.njol.skript.classes.Converter;
 import ch.njol.skript.expressions.base.EventValueExpression;
 import ch.njol.skript.util.Getter;
+import org.spongepowered.api.event.Event;
 
 /**
  * @author Peter Güttinger
@@ -215,7 +216,7 @@ public class EventValues {
 	}
 	
 	private final static boolean checkExcludes(final EventValueInfo<?, ?> ev, final Class<? extends Event> e) {
-		final Class<? extends Event>[] excl = ev.exculdes;
+		final Class<? extends Event>[] excl = ev.exculdes; //TODO ???
 		if (excl == null)
 			return true;
 		for (final Class<? extends Event> ex : excl) {

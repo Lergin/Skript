@@ -21,20 +21,14 @@
 
 package ch.njol.skript.lang.function;
 
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
+import ch.njol.skript.Skript;
+import org.spongepowered.api.event.Event;
+import org.spongepowered.api.event.cause.Cause;
 
-public final class FunctionEvent extends Event {
-	
-	// Bukkit stuff
-	private final static HandlerList handlers = new HandlerList();
-	
+public final class FunctionEvent implements Event {
+	//todo add cause support to skript
 	@Override
-	public HandlerList getHandlers() {
-		return handlers;
-	}
-	
-	public static HandlerList getHandlerList() {
-		return handlers;
+	public Cause getCause() {
+		return Cause.builder().owner(Skript.getInstance()).build();
 	}
 }

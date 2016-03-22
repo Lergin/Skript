@@ -36,14 +36,6 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.RandomAccess;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.eclipse.jdt.annotation.Nullable;
 
 import ch.njol.skript.Skript;
@@ -64,9 +56,9 @@ import ch.njol.util.coll.iterator.SingleItemIterable;
 import ch.njol.yggdrasil.Fields;
 import ch.njol.yggdrasil.YggdrasilSerializable.YggdrasilExtendedSerializable;
 
-@ContainerType(ItemStack.class)
+@ContainerType(org.spongepowered.api.item.ItemType.class)
 @SuppressWarnings("deprecation")
-public class ItemType implements Unit, Iterable<ItemData>, Container<ItemStack>, YggdrasilExtendedSerializable {
+public class ItemType implements Unit, Iterable<ItemData>, Container<org.spongepowered.api.item.ItemType>, YggdrasilExtendedSerializable {
 	
 	private final static Message m_named = new Message("aliases.named");
 	

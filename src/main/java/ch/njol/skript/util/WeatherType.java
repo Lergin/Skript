@@ -24,14 +24,14 @@ package ch.njol.skript.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.bukkit.World;
-import org.bukkit.event.weather.ThunderChangeEvent;
-import org.bukkit.event.weather.WeatherChangeEvent;
-import org.bukkit.event.weather.WeatherEvent;
 import org.eclipse.jdt.annotation.Nullable;
 
 import ch.njol.skript.localization.Language;
 import ch.njol.skript.localization.LanguageChangeListener;
+import org.spongepowered.api.event.world.ChangeWorldWeatherEvent;
+import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.weather.Weather;
+import org.spongepowered.api.world.weather.Weathers;
 
 /**
  * @author Peter Güttinger
@@ -74,39 +74,21 @@ public enum WeatherType {
 	
 	public static WeatherType fromWorld(final World world) {
 		assert world != null;
-		if (world.isThundering())
+		if (world.getProperties().isThundering())
 			return THUNDER;
-		if (world.hasStorm())
+		if (world.getProperties().isRaining())
 			return RAIN;
 		return CLEAR;
 	}
 	
-	public static WeatherType fromEvent(final WeatherEvent e) {
-		if (e instanceof WeatherChangeEvent)
-			return fromEvent((WeatherChangeEvent) e);
-		if (e instanceof ThunderChangeEvent)
-			return fromEvent((ThunderChangeEvent) e);
-		assert false;
-		return CLEAR;
-	}
-	
-	public static WeatherType fromEvent(final WeatherChangeEvent e) {
-		assert e != null;
-		if (!e.toWeatherState())
-			return CLEAR;
-		if (e.getWorld().isThundering())
-			return THUNDER;
-		return RAIN;
-	}
-	
-	public static WeatherType fromEvent(final ThunderChangeEvent e) {
-		assert e != null;
-		if (e.toThunderState())
-			return THUNDER;
-		if (e.getWorld().hasStorm())
+	public static WeatherType fromEvent(final ChangeWorldWeatherEvent e) {
+		if (e.getWeather() == Weathers.RAIN)
 			return RAIN;
+		if (e.getWeather() == Weathers.THUNDER_STORM)
+			return THUNDER;
 		return CLEAR;
 	}
+
 	
 	@SuppressWarnings("null")
 	@Override
@@ -126,7 +108,7 @@ public enum WeatherType {
 	}
 	
 	public boolean isWeather(final World w) {
-		return isWeather(w.hasStorm(), w.isThundering());
+		return isWeather(w.getProperties().isRaining(), w.getProperties().isThundering());
 	}
 	
 	public boolean isWeather(final boolean rain, final boolean thunder) {
@@ -143,10 +125,10 @@ public enum WeatherType {
 	}
 	
 	public void setWeather(final World w) {
-		if (w.isThundering() != (this == THUNDER))
-			w.setThundering(this == THUNDER);
-		if (w.hasStorm() != (this != CLEAR))
-			w.setStorm(this != CLEAR);
+		if (w.getProperties().isThundering() != (this == THUNDER))
+			w.getProperties().setThundering(this == THUNDER);
+		if (w.getProperties().isRaining() != (this != CLEAR))
+			w.getProperties().setRaining(this != CLEAR);
 	}
 	
 }

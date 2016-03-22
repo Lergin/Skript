@@ -27,6 +27,10 @@ import ch.njol.skript.util.FileUtils;
 import ch.njol.skript.util.Utils;
 import ch.njol.util.StringUtils;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.command.spec.CommandExecutor;
 
 /*
  *   This file is part of Skript.
@@ -92,7 +96,7 @@ public class SkriptCommand implements CommandExecutor {
 	
 	private final static ArgsMessage m_changes_title = new ArgsMessage(NODE + ".update.changes.title");
 	
-	private final static void reloaded(final CommandSender sender, final RedirectingLogHandler r, String what, final Object... args) {
+	private final static void reloaded(final CommandSource sender, final RedirectingLogHandler r, String what, final Object... args) {
 		what = args.length == 0 ? Language.get(NODE + ".reload." + what) : PluralizingArgsMessage.format(Language.format(NODE + ".reload." + what, args));
 		if (r.numErrors() == 0)
 			Skript.info(sender, StringUtils.fixCapitalization(PluralizingArgsMessage.format(m_reloaded.toString(what))));
@@ -100,28 +104,29 @@ public class SkriptCommand implements CommandExecutor {
 			Skript.error(sender, StringUtils.fixCapitalization(PluralizingArgsMessage.format(m_reload_error.toString(what, r.numErrors()))));
 	}
 	
-	private final static void info(final CommandSender sender, String what, final Object... args) {
+	private final static void info(final CommandSource sender, String what, final Object... args) {
 		what = args.length == 0 ? Language.get(NODE + "." + what) : PluralizingArgsMessage.format(Language.format(NODE + "." + what, args));
 		Skript.info(sender, StringUtils.fixCapitalization(what));
 	}
 	
-	private final static void message(final CommandSender sender, String what, final Object... args) {
+	private final static void message(final CommandSource sender, String what, final Object... args) {
 		what = args.length == 0 ? Language.get(NODE + "." + what) : PluralizingArgsMessage.format(Language.format(NODE + "." + what, args));
 		Skript.message(sender, StringUtils.fixCapitalization(what));
 	}
 	
-	private final static void error(final CommandSender sender, String what, final Object... args) {
+	private final static void error(final CommandSource sender, String what, final Object... args) {
 		what = args.length == 0 ? Language.get(NODE + "." + what) : PluralizingArgsMessage.format(Language.format(NODE + "." + what, args));
 		Skript.error(sender, StringUtils.fixCapitalization(what));
 	}
 	
 	@Override
-	@SuppressFBWarnings("REC_CATCH_EXCEPTION")
-	public boolean onCommand(final @Nullable CommandSender sender, final @Nullable Command command, final @Nullable String label, final @Nullable String[] args) {
+	//@SuppressFBWarnings("REC_CATCH_EXCEPTION")
+	//final @Nullable Command command, final @Nullable String label,
+	public CommandResult execute(final @Nullable CommandSource sender, final @Nullable CommandContext args) {
 		if (sender == null || command == null || label == null || args == null)
 			throw new IllegalArgumentException();
 		if (!skriptCommandHelp.test(sender, args))
-			return true;
+			return CommandResult.success();
 		final RedirectingLogHandler r = SkriptLogger.startLogHandler(new RedirectingLogHandler(sender, ""));
 		try {
 			if (args[0].equalsIgnoreCase("reload")) {
@@ -144,11 +149,11 @@ public class SkriptCommand implements CommandExecutor {
 				} else {
 					final File f = getScriptFromArgs(sender, args, 1);
 					if (f == null)
-						return true;
+						return CommandResult.success();
 					if (!f.isDirectory()) {
 						if (f.getName().startsWith("-")) {
 							info(sender, "reload.script disabled", f.getName().substring(1));
-							return true;
+							return CommandResult.success();
 						}
 						reloading(sender, "script", f.getName());
 						ScriptLoader.unloadScript(f);
@@ -182,18 +187,18 @@ public class SkriptCommand implements CommandExecutor {
 				} else {
 					File f = getScriptFromArgs(sender, args, 1);
 					if (f == null)
-						return true;
+						return CommandResult.success();
 					if (!f.isDirectory()) {
 						if (!f.getName().startsWith("-")) {
 							info(sender, "enable.single.already enabled", f.getName(), StringUtils.join(args, " ", 1, args.length));
-							return true;
+							return CommandResult.success();
 						}
 						
 						try {
 							f = FileUtils.move(f, new File(f.getParentFile(), f.getName().substring(1)), false);
 						} catch (final IOException e) {
 							error(sender, "enable.single.io error", f.getName().substring(1), ExceptionUtils.toString(e));
-							return true;
+							return CommandResult.success();
 						}
 						
 						info(sender, "enable.single.enabling", f.getName());
@@ -203,18 +208,18 @@ public class SkriptCommand implements CommandExecutor {
 						} else {
 							error(sender, "enable.single.error", f.getName(), r.numErrors());
 						}
-						return true;
+						return CommandResult.success();
 					} else {
 						final Collection<File> scripts;
 						try {
 							scripts = toggleScripts(f, true);
 						} catch (final IOException e) {
 							error(sender, "enable.folder.io error", f.getName(), ExceptionUtils.toString(e));
-							return true;
+							return CommandResult.success();
 						}
 						if (scripts.isEmpty()) {
 							info(sender, "enable.folder.empty", f.getName());
-							return true;
+							return CommandResult.success();
 						}
 						info(sender, "enable.folder.enabling", f.getName(), scripts.size());
 						final File[] ss = scripts.toArray(new File[scripts.size()]);
@@ -226,7 +231,7 @@ public class SkriptCommand implements CommandExecutor {
 						} else {
 							error(sender, "enable.folder.error", f.getName(), r.numErrors());
 						}
-						return true;
+						return CommandResult.success();
 					}
 				}
 			} else if (args[0].equalsIgnoreCase("disable")) {
@@ -241,11 +246,11 @@ public class SkriptCommand implements CommandExecutor {
 				} else {
 					final File f = getScriptFromArgs(sender, args, 1);
 					if (f == null) // TODO allow disabling deleted/renamed scripts
-						return true;
+						return CommandResult.success();
 					if (!f.isDirectory()) {
 						if (f.getName().startsWith("-")) {
 							info(sender, "disable.single.already disabled", f.getName().substring(1));
-							return true;
+							return CommandResult.success();
 						}
 						
 						ScriptLoader.unloadScript(f);
@@ -254,28 +259,28 @@ public class SkriptCommand implements CommandExecutor {
 							FileUtils.move(f, new File(f.getParentFile(), "-" + f.getName()), false);
 						} catch (final IOException e) {
 							error(sender, "disable.single.io error", f.getName(), ExceptionUtils.toString(e));
-							return true;
+							return CommandResult.success();
 						}
 						info(sender, "disable.single.disabled", f.getName());
-						return true;
+						return CommandResult.success();
 					} else {
 						final Collection<File> scripts;
 						try {
 							scripts = toggleScripts(f, false);
 						} catch (final IOException e) {
 							error(sender, "disable.folder.io error", f.getName(), ExceptionUtils.toString(e));
-							return true;
+							return CommandResult.success();
 						}
 						if (scripts.isEmpty()) {
 							info(sender, "disable.folder.empty", f.getName());
-							return true;
+							return CommandResult.success();
 						}
 						
 						for (final File script : scripts)
 							ScriptLoader.unloadScript(new File(script.getParentFile(), script.getName().substring(1)));
 						
 						info(sender, "disable.folder.disabled", f.getName(), scripts.size());
-						return true;
+						return CommandResult.success();
 					}
 				}
 			} else if (args[0].equalsIgnoreCase("update")) {
@@ -405,7 +410,7 @@ public class SkriptCommand implements CommandExecutor {
 		} finally {
 			r.stop();
 		}
-		return true;
+		return CommandResult.success();
 	}
 	
 	private final static ArgsMessage m_invalid_script = new ArgsMessage(NODE + ".invalid script");

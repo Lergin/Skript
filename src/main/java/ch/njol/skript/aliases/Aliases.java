@@ -55,6 +55,8 @@ import ch.njol.skript.util.PotionEffectUtils;
 import ch.njol.skript.util.Utils;
 import ch.njol.util.NonNullPair;
 import ch.njol.util.Setter;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockType;
 
 /**
  * FIXME rename
@@ -84,8 +86,8 @@ public abstract class Aliases {
 		return getAliases().get(s);
 	}
 	
-	private final static HashMap<Integer, MaterialName> materialNames_english = new HashMap<Integer, MaterialName>(Material.values().length);
-	private final static HashMap<Integer, MaterialName> materialNames_localised = new HashMap<Integer, MaterialName>(Material.values().length);
+	private final static HashMap<Integer, MaterialName> materialNames_english = new HashMap<Integer, MaterialName>(Sponge.getRegistry().getAllOf(BlockType.class).size());
+	private final static HashMap<Integer, MaterialName> materialNames_localised = new HashMap<Integer, MaterialName>(Sponge.getRegistry().getAllOf(BlockType.class).size());
 	
 	private final static HashMap<Integer, MaterialName> getMaterialNames() {
 		return Language.isUsingLocal() ? materialNames_localised : materialNames_english;
@@ -471,8 +473,9 @@ public abstract class Aliases {
 		final HashMap<Integer, MaterialName> materialNames = getMaterialNames();
 		int r = 0;
 		final StringBuilder missing = new StringBuilder(m_missing_aliases + " ");
-		for (final Material m : Material.values()) {
+		for (final BlockType m : Sponge.getRegistry().getAllOf(BlockType.class)) {
 			if (materialNames.get(Integer.valueOf(m.getId())) == null) {
+				//todo: add blockId to oldId or remove oldIds from everywhere
 				materialNames.put(Integer.valueOf(m.getId()), new MaterialName(m.getId(), "" + m.toString().toLowerCase().replace('_', ' '), "" + m.toString().toLowerCase().replace('_', ' '), 0));
 				missing.append(m.getId() + ", ");
 				r++;

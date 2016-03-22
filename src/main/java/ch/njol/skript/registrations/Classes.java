@@ -64,6 +64,8 @@ import ch.njol.yggdrasil.Yggdrasil;
 import ch.njol.yggdrasil.YggdrasilInputStream;
 import ch.njol.yggdrasil.YggdrasilOutputStream;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.world.Chunk;
 
 /**
  * @author Peter Güttinger
@@ -709,7 +711,8 @@ public abstract class Classes {
 			if (!(d instanceof Chunk))
 				return false;
 			final Chunk c1 = (Chunk) o, c2 = (Chunk) d;
-			return c1.getWorld().equals(c2.getWorld()) && c1.getX() == c2.getX() && c1.getZ() == c2.getZ();
+			return c1.getWorld().equals(c2.getWorld()) && c1.getPosition().getX() == c2.getPosition().getX()
+					&& c1.getPosition().getZ() == c2.getPosition().getZ();
 		}
 		return o == null ? d == null : o.equals(d);
 	}

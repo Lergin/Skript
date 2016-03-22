@@ -37,6 +37,8 @@ import org.eclipse.jdt.annotation.Nullable;
 import ch.njol.skript.aliases.ItemType;
 import ch.njol.skript.localization.Language;
 import ch.njol.skript.localization.LanguageChangeListener;
+import org.spongepowered.api.effect.potion.PotionEffectType;
+import org.spongepowered.api.effect.potion.PotionEffectTypes;
 
 /**
  * @author Peter Güttinger
@@ -114,52 +116,53 @@ public abstract class PotionEffectUtils {
 	 * @return
 	 */
 	@Nullable
-	public static PotionType checkPotionType(String name) {
+	public static PotionEffectType checkPotionType(String name) {
 		switch (name) {
 			case "uncraftable":
 			case "empty":
-				return PotionType.UNCRAFTABLE;
+				return null;
 			case "mundane":
-				return PotionType.MUNDANE;
+				return PotionEffectTypes.MUNDANE;
 			case "thick":
-				return PotionType.THICK;
+				return PotionEffectTypes.THICK;
 			case "night vision":
 			case "darkvision":
-				return PotionType.NIGHT_VISION;
+				return PotionEffectTypes.NIGHT_VISION;
 			case "invisibility":
-				return PotionType.INVISIBILITY;
+				return PotionEffectTypes.INVISIBILITY;
 			case "leaping":
 			case "jump boost":
-				return PotionType.JUMP;
+				return PotionEffectTypes.JUMP_BOOST;
 			case "fire resistance":
 			case "fire immunity":
-				return PotionType.FIRE_RESISTANCE;
+				return PotionEffectTypes.FIRE_RESISTANCE;
 			case "swiftness":
 			case "speed":
-				return PotionType.SPEED;
+				return PotionEffectTypes.SPEED;
 			case "slowness":
-				return PotionType.SLOWNESS;
+				return PotionEffectTypes.SLOWNESS;
 			case "water breathing":
-				return PotionType.WATER_BREATHING;
+				return PotionEffectTypes.WATER_BREATHING;
 			case "instant health":
 			case "healing":
 			case "health":
-				return PotionType.INSTANT_HEAL;
+				return PotionEffectTypes.INSTANT_HEALTH;
 			case "instant damage":
 			case "harming":
 			case "damage":
-				return PotionType.INSTANT_DAMAGE;
+				return PotionEffectTypes.INSTANT_DAMAGE;
 			case "poison":
-				return PotionType.POISON;
+				return PotionEffectTypes.POISON;
 			case "regeneration":
 			case "regen":
-				return PotionType.REGEN;
+				return PotionEffectTypes.REGENERATION;
 			case "strength":
-				return PotionType.STRENGTH;
+				return PotionEffectTypes.STRENGTH;
 			case "weakness":
-				return PotionType.WEAKNESS;
-			case "luck":
-				return PotionType.LUCK;
+				return PotionEffectTypes.WEAKNESS;
+//still 1.8
+//			case "luck":
+//				return PotionEffectTypes.LUCK;
 		}
 		
 		return null;
@@ -170,11 +173,11 @@ public abstract class PotionEffectUtils {
 	 * Changing one method is easier that changing loads of them from different expressions.
 	 * @param effect Type.
 	 * @return Potion type.
-	 */
+	 *//*
 	@Nullable
-	public static PotionType effectToType(PotionEffectType effect) {
+	public static PotionEffectType effectToType(PotionEffectType effect) {
 		return PotionType.getByEffect(effect);
-	}
+	}*/
 	
 	/**
 	 * Get potion string representation.
