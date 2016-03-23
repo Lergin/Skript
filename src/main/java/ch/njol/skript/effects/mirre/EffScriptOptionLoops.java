@@ -21,7 +21,6 @@
 
 package ch.njol.skript.effects.mirre;
 
-import org.bukkit.event.Event;
 import org.eclipse.jdt.annotation.Nullable;
 
 import ch.njol.skript.ScriptLoader;
@@ -33,6 +32,7 @@ import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.log.ErrorQuality;
 import ch.njol.skript.util.ScriptOptions;
 import ch.njol.util.Kleenean;
+import org.spongepowered.api.event.Event;
 
 /**
  * @author Peter Güttinger

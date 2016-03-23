@@ -21,9 +21,6 @@
 
 package ch.njol.skript.expressions;
 
-import org.bukkit.Location;
-import org.bukkit.block.Block;
-import org.bukkit.event.Event;
 import org.eclipse.jdt.annotation.Nullable;
 
 import ch.njol.skript.Skript;
@@ -40,6 +37,10 @@ import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.lang.util.ConvertedExpression;
 import ch.njol.skript.util.Direction;
 import ch.njol.util.Kleenean;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.event.Event;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 
 /**
  * @author Peter Güttinger
@@ -56,26 +57,26 @@ import ch.njol.util.Kleenean;
 		"block is a chest:",
 		"	clear the inventory of the block"})
 @Since("1.0")
-public class ExprBlock extends WrapperExpression<Block> {
+public class ExprBlock extends WrapperExpression<BlockState> {
 	static {
-		Skript.registerExpression(ExprBlock.class, Block.class, ExpressionType.SIMPLE, "[the] [event-]block");
-		Skript.registerExpression(ExprBlock.class, Block.class, ExpressionType.COMBINED, "[the] block %direction% [%location%]");
+		Skript.registerExpression(ExprBlock.class, BlockState.class, ExpressionType.SIMPLE, "[the] [event-]block");
+		Skript.registerExpression(ExprBlock.class, BlockState.class, ExpressionType.COMBINED, "[the] block %direction% [%location%]");
 	}
 	
 	@SuppressWarnings({"unchecked", "null"})
 	@Override
 	public boolean init(final Expression<?>[] exprs, final int matchedPattern, final Kleenean isDelayed, final ParseResult parser) {
 		if (exprs.length > 0) {
-			setExpr(new ConvertedExpression<Location, Block>(Direction.combine((Expression<? extends Direction>) exprs[0], (Expression<? extends Location>) exprs[1]), Block.class, new Converter<Location, Block>() {
+			setExpr(new ConvertedExpression<Location<World>, BlockState>(Direction.combine((Expression<? extends Direction>) exprs[0], (Expression<? extends Location<World>>) exprs[1]), BlockState.class, new Converter<Location<World>, BlockState>() {
 				@Override
-				public Block convert(final Location l) {
+				public BlockState convert(final Location l) {
 					return l.getBlock();
 				}
 			}));
 			return true;
 		} else {
-			setExpr(new EventValueExpression<Block>(Block.class));
-			return ((EventValueExpression<Block>) getExpr()).init();
+			setExpr(new EventValueExpression<BlockState>(BlockState.class));
+			return ((EventValueExpression<BlockState>) getExpr()).init();
 		}
 	}
 	

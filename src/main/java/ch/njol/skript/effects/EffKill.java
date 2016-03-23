@@ -21,11 +21,6 @@
 
 package ch.njol.skript.effects;
 
-import org.bukkit.GameMode;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.eclipse.jdt.annotation.Nullable;
 
 import ch.njol.skript.Skript;
@@ -38,6 +33,12 @@ import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.util.Kleenean;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.Living;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.gamemode.GameModes;
+import org.spongepowered.api.event.Event;
 
 /**
  * @author Peter Güttinger
@@ -67,13 +68,17 @@ public class EffKill extends Effect {
 	@Override
 	protected void execute(final Event e) {
 		for (final Entity entity : entities.getArray(e)) {
-			if (entity instanceof LivingEntity) {
-				final boolean creative = entity instanceof Player && ((Player) entity).getGameMode() == GameMode.CREATIVE;
-				if (creative)
-					((Player) entity).setGameMode(GameMode.SURVIVAL);
-				HealthUtils.damage((LivingEntity) entity, HealthUtils.getMaxHealth((LivingEntity) entity) * 100); // just to make sure that it really dies >:)
-				if (creative)
-					((Player) entity).setGameMode(GameMode.CREATIVE);
+			if (entity instanceof Living) {
+				// I don't think this is needed if we remove the entity
+				//final boolean creative = entity instanceof Player &&
+				//		((Player) entity).get(Keys.GAME_MODE).orElse(GameModes.NOT_SET) == GameModes.CREATIVE;
+				//if (creative)
+				//	((Player) entity).offer(Keys.GAME_MODE, GameModes.SURVIVAL);
+
+				entity.remove();//todo: does this kill an entity
+
+				//if (creative)
+				//	((Player) entity).offer(Keys.GAME_MODE, GameModes.CREATIVE);
 			}
 		}
 	}

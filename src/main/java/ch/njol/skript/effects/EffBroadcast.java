@@ -21,14 +21,9 @@
 
 package ch.njol.skript.effects;
 
-import org.bukkit.Bukkit;
-import org.bukkit.World;
-import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.eclipse.jdt.annotation.Nullable;
 
 import ch.njol.skript.Skript;
-import ch.njol.skript.bukkitutil.PlayerUtils;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
@@ -37,6 +32,11 @@ import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.util.Kleenean;
+import org.spongepowered.api.event.Event;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageChannel;
+import org.spongepowered.api.text.chat.ChatTypes;
+import org.spongepowered.api.world.World;
 
 /**
  * @author Peter Güttinger
@@ -69,16 +69,10 @@ public class EffBroadcast extends Effect {
 		for (final String m : messages.getArray(e)) {
 			final Expression<World> worlds = this.worlds;
 			if (worlds == null) {
-				// not Bukkit.broadcastMessage to ignore permissions
-				for (final Player p : PlayerUtils.getOnlinePlayers()) {
-					p.sendMessage(m);
-				}
-				Bukkit.getConsoleSender().sendMessage(m);
+				MessageChannel.TO_ALL.send(Text.of(m));
 			} else {
 				for (final World w : worlds.getArray(e)) {
-					for (final Player p : w.getPlayers()) {
-						p.sendMessage(m);
-					}
+					w.sendMessage(ChatTypes.CHAT, Text.of(m));
 				}
 			}
 		}

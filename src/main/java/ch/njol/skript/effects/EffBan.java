@@ -22,12 +22,8 @@
 package ch.njol.skript.effects;
 
 import java.util.Date;
+import java.util.UUID;
 
-import org.bukkit.BanList;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.eclipse.jdt.annotation.Nullable;
 
 import ch.njol.skript.Skript;
@@ -39,6 +35,14 @@ import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.util.Kleenean;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.Event;
+import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.service.ban.BanService;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.util.ban.Ban;
+import org.spongepowered.api.util.ban.BanTypes;
 
 /**
  * @author Peter Güttinger
@@ -51,9 +55,6 @@ import ch.njol.util.Kleenean;
 		"IP-ban the player because \"he is an idiot\""})
 @Since("1.4, 2.1.1 (ban reason)")
 public class EffBan extends Effect {
-	
-	public final static boolean hasBanList = Skript.classExists("org.bukkit.BanList");
-	
 	static {
 		Skript.registerEffect(EffBan.class,
 				"ban %strings/offlineplayers% [(by reason of|because [of]|on account of|due to) %-string%]", "unban %strings/offlineplayers%",
@@ -74,74 +75,67 @@ public class EffBan extends Effect {
 	public boolean init(final Expression<?>[] exprs, final int matchedPattern, final Kleenean isDelayed, final ParseResult parseResult) {
 		players = exprs[0];
 		reason = exprs.length > 1 ? (Expression<String>) exprs[1] : null;
-		if (!hasBanList && reason != null) {
-			Skript.error("Bukkit 1.7.2 R0.4 or later is required to ban players with a reason.");
-			return false;
-		}
 		ban = matchedPattern % 2 == 0;
 		ipBan = matchedPattern >= 2;
 		return true;
 	}
 	
-	@SuppressWarnings("deprecation")
 	@Override
 	protected void execute(final Event e) {
-		final String reason = this.reason != null ? this.reason.getSingle(e) : null; // don't check for null, just ignore an invalid reason
+		final String reason = this.reason != null ? this.reason.getSingle(e) : ""; // don't check for null, just ignore an invalid reason
 		final Date expires = null;
 		final String source = "Skript ban effect";
 		for (final Object o : players.getArray(e)) {
-			if (o instanceof Player) {
-				if (ipBan) {
-					final String ip = ((Player) o).getAddress().getAddress().getHostAddress();
-					if (hasBanList) {
-						if (ban)
-							Bukkit.getBanList(BanList.Type.IP).addBan(ip, reason, expires, source);
-						else
-							Bukkit.getBanList(BanList.Type.IP).pardon(ip);
-					} else {
-						if (ban)
-							Bukkit.banIP(ip);
-						else
-							Bukkit.unbanIP(ip);
-					}
-				} else {
-					if (hasBanList) {
-						if (ban)
-							Bukkit.getBanList(BanList.Type.NAME).addBan(((Player) o).getName(), reason, expires, source); // FIXME [UUID] ban UUID
-						else
-							Bukkit.getBanList(BanList.Type.NAME).pardon(((Player) o).getName());
-					} else {
-						((Player) o).setBanned(ban);
-					}
+			BanService banService = Sponge.getServiceManager().getRegistration(BanService.class).get().getProvider();
+
+			if (ban) {
+				Ban.Builder banBuilder = Ban.builder();
+
+				if (expires != null) {
+					banBuilder.expirationDate(expires.toInstant());
 				}
-			} else if (o instanceof OfflinePlayer) {
-				if (hasBanList) {
-					if (ban)
-						Bukkit.getBanList(BanList.Type.NAME).addBan(((OfflinePlayer) o).getName(), reason, expires, source);
-					else
-						Bukkit.getBanList(BanList.Type.NAME).pardon(((OfflinePlayer) o).getName());
-				} else {
-					((OfflinePlayer) o).setBanned(ban);
+
+				if (reason != null) {
+					banBuilder.reason(Text.of(reason));
 				}
-			} else if (o instanceof String) {
-				final String s = (String) o;
-				if (hasBanList) {
-					if (ban) {
-						Bukkit.getBanList(BanList.Type.IP).addBan(s, reason, expires, source);
-						Bukkit.getBanList(BanList.Type.NAME).addBan(s, reason, expires, source);
+
+				banBuilder.source(Text.of(source));
+
+				if (o instanceof Player) {
+					if (ipBan) {
+						banBuilder.type(BanTypes.IP).address(((Player) o).getConnection().getAddress().getAddress());
 					} else {
-						Bukkit.getBanList(BanList.Type.IP).pardon(s);
-						Bukkit.getBanList(BanList.Type.NAME).pardon(s);
+						banBuilder.type(BanTypes.PROFILE).profile(((Player) o).getProfile());
 					}
+				} else if (o instanceof GameProfile) {
+					banBuilder.type(BanTypes.PROFILE).profile((GameProfile) o);
+				} else if (o instanceof UUID) {
+					banBuilder.type(BanTypes.PROFILE).profile(GameProfile.of((UUID) o, null));
+				} else if (o instanceof String) {
+					System.out.println("String as ban no longer supported use UUID"); //todo only as a reminder
+					assert false;
 				} else {
-					if (ban)
-						Bukkit.banIP(s);
-					else
-						Bukkit.unbanIP(s);
-					Bukkit.getOfflinePlayer(s).setBanned(ban);
+					assert false;
 				}
+
+				banService.addBan(banBuilder.build());
 			} else {
-				assert false;
+				if (o instanceof Player) {
+					if (ipBan) {
+						banService.pardon(((Player) o).getConnection().getAddress().getAddress());
+					} else {
+						banService.pardon(((Player) o).getProfile());
+					}
+				} else if (o instanceof GameProfile) {
+					banService.pardon((GameProfile) o);
+				} else if (o instanceof UUID) {
+					banService.pardon(GameProfile.of((UUID) o, null));
+				} else if (o instanceof String) {
+					System.out.println("String as ban no longer supported use UUID"); //todo only as a reminder
+					assert false;
+				} else {
+					assert false;
+				}
 			}
 		}
 	}
