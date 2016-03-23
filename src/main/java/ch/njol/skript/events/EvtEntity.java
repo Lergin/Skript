@@ -21,12 +21,6 @@
 
 package ch.njol.skript.events;
 
-import org.bukkit.entity.Creature;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.event.Event;
-import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
 import org.eclipse.jdt.annotation.Nullable;
 
 import ch.njol.skript.Skript;
@@ -37,6 +31,12 @@ import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.log.ErrorQuality;
 import ch.njol.skript.registrations.Classes;
 import ch.njol.util.StringUtils;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.Living;
+import org.spongepowered.api.event.Event;
+import org.spongepowered.api.event.entity.AffectEntityEvent;
+import org.spongepowered.api.event.entity.DestructEntityEvent;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 
 /**
  * @author Peter Güttinger
@@ -44,14 +44,14 @@ import ch.njol.util.StringUtils;
 @SuppressWarnings("unchecked")
 public final class EvtEntity extends SkriptEvent {
 	static {
-		Skript.registerEvent("Death", EvtEntity.class, EntityDeathEvent.class, "death [of %entitydatas%]")
+		Skript.registerEvent("Death", EvtEntity.class, DestructEntityEvent.Death.class, "death [of %entitydatas%]")
 				.description("Called when a living entity (including players) dies.")
 				.examples("on death",
 						"on death of player",
 						"on death of a wither or ender dragon:",
 						"	broadcast \"A %entity% has been slain in %world%!\"")
 				.since("1.0");
-		Skript.registerEvent("Spawn", EvtEntity.class, CreatureSpawnEvent.class, "spawn[ing] [of %entitydatas%]")
+		Skript.registerEvent("Spawn", EvtEntity.class, SpawnEntityEvent.class, "spawn[ing] [of %entitydatas%]")
 				.description("Called when an creature spawns.")
 				.examples("on spawn of a zombie",
 						"on spawn of an ender dragon:",
@@ -69,14 +69,14 @@ public final class EvtEntity extends SkriptEvent {
 		if (types != null) {
 			if (StringUtils.startsWithIgnoreCase(parser.expr, "spawn")) {
 				for (final EntityData<?> d : types) {
-					if (!Creature.class.isAssignableFrom(d.getType())) {
+					if (!Entity.class.isAssignableFrom(d.getType())) {
 						Skript.error("The spawn event only works for creatures", ErrorQuality.SEMANTIC_ERROR);
 						return false;
 					}
 				}
 			} else {
 				for (final EntityData<?> d : types) {
-					if (!LivingEntity.class.isAssignableFrom(d.getType())) {
+					if (!Living.class.isAssignableFrom(d.getType())) {
 						Skript.error("The death event only works for living entities", ErrorQuality.SEMANTIC_ERROR);
 						return false;
 					}
@@ -91,7 +91,7 @@ public final class EvtEntity extends SkriptEvent {
 	public boolean check(final Event e) {
 		if (types == null)
 			return true;
-		final Entity en = e instanceof EntityDeathEvent ? ((EntityDeathEvent) e).getEntity() : ((CreatureSpawnEvent) e).getEntity();
+		final Entity en = ((AffectEntityEvent) e).getEntities().get(0);//todo use everyone
 		for (final EntityData<?> d : types) {
 			if (d.isInstance(en))
 				return true;

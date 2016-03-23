@@ -22,9 +22,6 @@
 package ch.njol.skript.command;
 
 import ch.njol.skript.Skript;
-import org.bukkit.command.CommandSender;
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
 import org.eclipse.jdt.annotation.Nullable;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.event.Event;
@@ -57,18 +54,6 @@ public class CommandEvent implements Event {
 	@Nullable
 	public String[] getArgs() {
 		return args;
-	}
-	
-	// Bukkit stuff
-	private final static HandlerList handlers = new HandlerList();
-	
-	@Override
-	public HandlerList getHandlers() {
-		return handlers;
-	}
-	
-	public static HandlerList getHandlerList() {
-		return handlers;
 	}
 
 	@Override

@@ -43,6 +43,7 @@ import ch.njol.skript.registrations.Classes;
 import ch.njol.skript.util.Time;
 import ch.njol.util.Math2;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.spongepowered.api.event.Event;
 
 /**
  * @author Peter Güttinger
@@ -57,7 +58,17 @@ public class EvtAtTime extends SelfRegisteringSkriptEvent implements Comparable<
 	}
 	
 	private final static int CHECKPERIOD = 10;
-	
+
+	/**
+	 * @param e     The event to get information to. This is always null if debug == false.
+	 * @param debug If true this should print more information, if false this should print what is shown to the end user
+	 * @return String representation of this object
+	 */
+	@Override
+	public String toString(@Nullable Event e, boolean debug) {
+		return null;
+	}
+
 	private final static class EvtAtInfo {
 		public EvtAtInfo() {}
 		

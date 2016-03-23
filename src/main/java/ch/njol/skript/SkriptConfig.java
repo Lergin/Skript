@@ -87,7 +87,8 @@ public abstract class SkriptConfig {
 	
 	public final static Option<Boolean> enableEffectCommands = new Option<Boolean>("enable effect commands", false);
 	public final static Option<String> effectCommandToken = new Option<String>("effect command token", "!");
-	public final static Option<Boolean> allowOpsToUseEffectCommands = new Option<Boolean>("allow ops to use effect commands", false);
+	//todo do i need an error message?! -> op auto. gives all permission no way to check them with sponge
+	//public final static Option<Boolean> allowOpsToUseEffectCommands = new Option<Boolean>("allow ops to use effect commands", false);
 	
 	// everything handled by Variables
 	public final static OptionSection databases = new OptionSection("databases");

@@ -21,67 +21,23 @@
 
 package ch.njol.skript.events;
 
-import org.bukkit.event.block.BlockCanBuildEvent;
-import org.bukkit.event.block.BlockDamageEvent;
-import org.bukkit.event.block.BlockFromToEvent;
-import org.bukkit.event.block.BlockIgniteEvent;
-import org.bukkit.event.block.BlockPhysicsEvent;
-import org.bukkit.event.block.BlockPistonExtendEvent;
-import org.bukkit.event.block.BlockPistonRetractEvent;
-import org.bukkit.event.block.BlockRedstoneEvent;
-import org.bukkit.event.block.BlockSpreadEvent;
-import org.bukkit.event.block.LeavesDecayEvent;
-import org.bukkit.event.block.SignChangeEvent;
-import org.bukkit.event.entity.CreeperPowerEvent;
-import org.bukkit.event.entity.EntityBreakDoorEvent;
-import org.bukkit.event.entity.EntityCombustEvent;
-import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.event.entity.EntityPortalEnterEvent;
-import org.bukkit.event.entity.EntityRegainHealthEvent;
-import org.bukkit.event.entity.EntityTameEvent;
-import org.bukkit.event.entity.ExplosionPrimeEvent;
-import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.event.entity.PigZapEvent;
-import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.event.entity.ProjectileLaunchEvent;
-import org.bukkit.event.inventory.FurnaceBurnEvent;
-import org.bukkit.event.inventory.FurnaceSmeltEvent;
-import org.bukkit.event.player.PlayerBedEnterEvent;
-import org.bukkit.event.player.PlayerBedLeaveEvent;
-import org.bukkit.event.player.PlayerBucketEmptyEvent;
-import org.bukkit.event.player.PlayerBucketFillEvent;
-import org.bukkit.event.player.PlayerEggThrowEvent;
-import org.bukkit.event.player.PlayerFishEvent;
-import org.bukkit.event.player.PlayerItemBreakEvent;
-import org.bukkit.event.player.PlayerItemHeldEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerKickEvent;
-import org.bukkit.event.player.PlayerLevelChangeEvent;
-import org.bukkit.event.player.PlayerLoginEvent;
-import org.bukkit.event.player.PlayerPortalEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
-import org.bukkit.event.player.PlayerToggleSneakEvent;
-import org.bukkit.event.player.PlayerToggleSprintEvent;
-import org.bukkit.event.vehicle.VehicleCreateEvent;
-import org.bukkit.event.vehicle.VehicleDamageEvent;
-import org.bukkit.event.vehicle.VehicleDestroyEvent;
-import org.bukkit.event.vehicle.VehicleEnterEvent;
-import org.bukkit.event.vehicle.VehicleExitEvent;
-import org.bukkit.event.weather.LightningStrikeEvent;
-import org.bukkit.event.world.ChunkLoadEvent;
-import org.bukkit.event.world.ChunkPopulateEvent;
-import org.bukkit.event.world.ChunkUnloadEvent;
-import org.bukkit.event.world.PortalCreateEvent;
-import org.bukkit.event.world.SpawnChangeEvent;
-import org.bukkit.event.world.WorldInitEvent;
-import org.bukkit.event.world.WorldLoadEvent;
-import org.bukkit.event.world.WorldSaveEvent;
-import org.bukkit.event.world.WorldUnloadEvent;
 
 import ch.njol.skript.Skript;
 import ch.njol.skript.lang.util.SimpleEvent;
+import org.spongepowered.api.event.action.FishingEvent;
+import org.spongepowered.api.event.action.LightningEvent;
+import org.spongepowered.api.event.block.InteractBlockEvent;
+import org.spongepowered.api.event.block.tileentity.SmeltEvent;
+import org.spongepowered.api.event.entity.TameEntityEvent;
+import org.spongepowered.api.event.entity.living.humanoid.player.KickPlayerEvent;
+import org.spongepowered.api.event.entity.living.humanoid.player.RespawnPlayerEvent;
+import org.spongepowered.api.event.entity.projectile.LaunchProjectileEvent;
+import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
+import org.spongepowered.api.event.network.ClientConnectionEvent;
+import org.spongepowered.api.event.world.*;
+import org.spongepowered.api.event.world.chunk.LoadChunkEvent;
+import org.spongepowered.api.event.world.chunk.PopulateChunkEvent;
+import org.spongepowered.api.event.world.chunk.UnloadChunkEvent;
 
 /**
  * @author Peter Güttinger
@@ -89,12 +45,12 @@ import ch.njol.skript.lang.util.SimpleEvent;
 @SuppressWarnings("unchecked")
 public class SimpleEvents {
 	static {
-		Skript.registerEvent("Can Build Check", SimpleEvent.class, BlockCanBuildEvent.class, "[block] can build check")
+		Skript.registerEvent("Can Build Check", SimpleEvent.class, InteractBlockEvent.Secondary.class, "[block] can build check")
 				.description("Called when a player rightclicks on a block while holding a block or a placeable item. You can either cancel the event to prevent the block from being built, or uncancel it to allow it.",
 						"Please note that the <a href='../expressions/#ExprDurability'>data value</a> of the block to be placed is not available in this event, only its <a href='../expressions/#ExprIdOf'>ID</a>.")
 				.examples("")
 				.since("1.0 (basic), 2.0 ([un]cancellable)");
-		Skript.registerEvent("Block Damage", SimpleEvent.class, BlockDamageEvent.class, "block damage")
+		Skript.registerEvent("Block Damage", SimpleEvent.class, InteractBlockEvent.Primary.class, "block damage")
 				.description("Called when a player starts to break a block. You can usually just use the leftclick event for this.")
 				.examples("")
 				.since("1.0");
@@ -132,15 +88,15 @@ public class SimpleEvents {
 				.description("Called when a new block <a href='#form'>forms</a> as a result of a block that can spread, e.g. water or mushrooms.")
 				.examples("")
 				.since("1.0");
-		Skript.registerEvent("Chunk Load", SimpleEvent.class, ChunkLoadEvent.class, "chunk load[ing]")
+		Skript.registerEvent("Chunk Load", SimpleEvent.class, LoadChunkEvent.class, "chunk load[ing]")
 				.description("Called when a chunk loads. The chunk might or might not contain mobs when it's loaded.")
 				.examples("")
 				.since("1.0");
-		Skript.registerEvent("Chunk Generate", SimpleEvent.class, ChunkPopulateEvent.class, "chunk (generat|populat)(e|ing)")
+		Skript.registerEvent("Chunk Generate", SimpleEvent.class, PopulateChunkEvent.class, "chunk (generat|populat)(e|ing)")
 				.description("Called after a new chunk was generated.")
 				.examples("")
 				.since("1.0");
-		Skript.registerEvent("Chunk Unload", SimpleEvent.class, ChunkUnloadEvent.class, "chunk unload[ing]")
+		Skript.registerEvent("Chunk Unload", SimpleEvent.class, UnloadChunkEvent.class, "chunk unload[ing]")
 				.description("Called when a chunk is unloaded due to not being near any player. Cancel the event to force the server to keep the chunk loaded " +
 						"and thus keep simulating the chunk (e.g. physics, plant growth, minecarts, etc. will keep working and won't freeze).")
 				.examples("")
@@ -157,7 +113,7 @@ public class SimpleEvents {
 				.description("Called when an entity is set on fire, e.g. by fire or lava, a fireball, or by standing in direct sunlight (zombies, skeletons).")
 				.examples("")
 				.since("1.0");
-		Skript.registerEvent("Explode", SimpleEvent.class, EntityExplodeEvent.class, "explo(d(e|ing)|sion)")
+		Skript.registerEvent("Explode", SimpleEvent.class, ExplosionEvent.Detonate.class, "explo(d(e|ing)|sion)")
 				.description("Called when an entity (a primed TNT or a creeper) explodes.")
 				.examples("")
 				.since("1.0");
@@ -170,7 +126,7 @@ public class SimpleEvents {
 				.description("Called when an entity is healed, e.g. by eating (players), being fed (pets), or by the effect of a potion of healing (overworld mobs) or harm (nether mobs).")
 				.examples("")
 				.since("1.0");
-		Skript.registerEvent("Tame", SimpleEvent.class, EntityTameEvent.class, "[entity] tam(e|ing)")
+		Skript.registerEvent("Tame", SimpleEvent.class, TameEntityEvent.class, "[entity] tam(e|ing)")
 				.description("Called when a player tames a wolf or ocelot. Can be cancelled to prevent the entity from being tamed.")
 				.examples("")
 				.since("1.0");
@@ -183,11 +139,11 @@ public class SimpleEvents {
 				.description("Called when the hunger bar of a player changes, i.e. either increases by eating or decreases over time.")
 				.examples("")
 				.since("1.4.4");
-		Skript.registerEvent("Fuel Burn", SimpleEvent.class, FurnaceBurnEvent.class, "fuel burn[ing]")
+		Skript.registerEvent("Fuel Burn", SimpleEvent.class, SmeltEvent.ConsumeFuel.class, "fuel burn[ing]")
 				.description("Called when a furnace burns an item from its <a href='../expressions/#ExprFurnaceSlot'>fuel slot</a>.")
 				.examples("")
 				.since("1.0");
-		Skript.registerEvent("Smelt", SimpleEvent.class, FurnaceSmeltEvent.class, "[ore] smelt[ing]", "smelt[ing] of ore")//"smelt[ing] of %itemtype%")
+		Skript.registerEvent("Smelt", SimpleEvent.class, SmeltEvent.Finish.class, "[ore] smelt[ing]", "smelt[ing] of ore")//"smelt[ing] of %itemtype%")
 		.description("Called when a furnace smelts an item in its <a href='../expressions/#ExprFurnaceSlot'>ore slot</a>.")
 				.examples("")
 				.since("1.0");
@@ -195,7 +151,7 @@ public class SimpleEvents {
 				.description("Called when a leaf block decays due to not being connected to a tree.")
 				.examples("")
 				.since("1.0");
-		Skript.registerEvent("Lightning Strike", SimpleEvent.class, LightningStrikeEvent.class, "lightning [strike]")
+		Skript.registerEvent("Lightning Strike", SimpleEvent.class, LightningEvent.Strike.class, "lightning [strike]")
 				.description("Called when lightning strikes.")
 				.examples("")
 				.since("1.0");
@@ -225,7 +181,7 @@ public class SimpleEvents {
 				.examples("")
 				.since("1.0");
 		// TODO improve - on fish [of %entitydata%] (and/or itemtype), on reel, etc.
-		Skript.registerEvent("Fishing", SimpleEvent.class, PlayerFishEvent.class, "[player] fish[ing]")
+		Skript.registerEvent("Fishing", SimpleEvent.class, FishingEvent.HookEntity.class, "[player] fish[ing]")
 				.description("Called when a player fishes something. This is not of much use yet.")
 				.examples("")
 				.since("1.0");
@@ -236,24 +192,24 @@ public class SimpleEvents {
 					.examples("")
 					.since("2.1.1");
 		}
-		Skript.registerEvent("Tool Change", SimpleEvent.class, PlayerItemHeldEvent.class, "[player['s]] (tool|item held|held item) chang(e|ing)")
+		Skript.registerEvent("Tool Change", SimpleEvent.class, ChangeInventoryEvent.Held.class, "[player['s]] (tool|item held|held item) chang(e|ing)")
 				.description("Called whenever a player changes his held item by selecting a different slot (e.g. the keys 1-9 or the mouse wheel), <i>not</i> by dropping or replacing the item in the current slot.")
 				.examples("")
 				.since("1.0");
-		Skript.registerEvent("Join", SimpleEvent.class, PlayerJoinEvent.class, "[player] (login|logging in|join[ing])")
+		Skript.registerEvent("Join", SimpleEvent.class, ClientConnectionEvent.Join.class, "[player] (login|logging in|join[ing])")
 				.description("Called when the player joins the server. The player is already in a world when this event is called, so if you want to prevent players from joining you should prefer <a href='#connect'>on connect</a> over this event.")
 				.examples("on join:",
 						"	message \"Welcome on our awesome server!\"",
 						"	broadcast \"%player% just joined the server!\"")
 				.since("1.0");
-		Skript.registerEvent("Connect", SimpleEvent.class, PlayerLoginEvent.class, "[player] connect[ing]")
+		Skript.registerEvent("Connect", SimpleEvent.class, ClientConnectionEvent.Auth.class, "[player] connect[ing]")
 				.description("Called when the player connects to the server. This event is called before the player actually joins the server, so if you want to prevent players from joining you should prefer this event over <a href='#join'>on join</a>.")
 				.examples("on connect:",
 						"	player doesn't have permission \"VIP\"",
 						"	number of players is larger than 20," +
 								"	kick the player due to \"The last 5 slots are reserved for VIP players.\"")
 				.since("2.0");
-		Skript.registerEvent("Kick", SimpleEvent.class, PlayerKickEvent.class, "[player] (kick|being kicked)")
+		Skript.registerEvent("Kick", SimpleEvent.class, KickPlayerEvent.class, "[player] (kick|being kicked)")
 				.description("Called when a player is kicked from the server. You can change the <a href='../expressions/#ExprMessage'>kick message</a> or <a href='../effects/#EffCancelEvent'>cancel the event</a> entirely.")
 				.examples("")
 				.since("1.0");
@@ -270,7 +226,7 @@ public class SimpleEvents {
 				.description("Called when a player leaves the server. Starting with Skript 2.0 this also includes kicked players.")
 				.examples("")
 				.since("1.0");
-		Skript.registerEvent("Respawn", SimpleEvent.class, PlayerRespawnEvent.class, "[player] respawn[ing]")
+		Skript.registerEvent("Respawn", SimpleEvent.class, RespawnPlayerEvent.class, "[player] respawn[ing]")
 				.description("Called when a player respawns. You should prefer this event over the <a href='#death'>death event</a> as the player is technically alive when this event is called.")
 				.examples("")
 				.since("1.0");
@@ -289,7 +245,7 @@ public class SimpleEvents {
 				.description("Called when a player starts or stops sprinting. Use <a href='../conditions/#CondIsSprinting'>is sprinting</a> to get whether the player was sprinting before the event was called.")
 				.examples("")
 				.since("");
-		Skript.registerEvent("Portal Create", SimpleEvent.class, PortalCreateEvent.class, "portal create")
+		Skript.registerEvent("Portal Create", SimpleEvent.class, ConstructPortalEvent.class, "portal create")
 				.description("Called when a portal is created, either by a player or mob lighting an obsidian frame on fire, or by a nether portal creating its teleportation target in the nether/overworld.",
 						"Please note that it's not possible to use <a href='../expressions/#ExprEntity'>the player</a> in this event.")
 				.examples("")
@@ -301,7 +257,7 @@ public class SimpleEvents {
 						"A damage event will even be fired if the damage is 0, e.g. when throwing snowballs at non-nether mobs.")
 				.examples("")
 				.since("1.0");
-		Skript.registerEvent("Shoot", SimpleEvent.class, ProjectileLaunchEvent.class, "[projectile] shoot")
+		Skript.registerEvent("Shoot", SimpleEvent.class, LaunchProjectileEvent.class, "[projectile] shoot")
 				.description("Called whenever a <a href='../classes/#projectile'>projectile</a> is shot. Use the <a href='../expressions/#ExprShooter'>shooter expression</a> to get who shot the projectile.")
 				.examples("")
 				.since("1.0");
@@ -335,20 +291,20 @@ public class SimpleEvents {
 				.description("Called when an entity exits a vehicle.")
 				.examples("")
 				.since("1.0");
-		Skript.registerEvent("World Init", SimpleEvent.class, WorldInitEvent.class, "world init")
+		Skript.registerEvent("World Init", SimpleEvent.class, ConstructWorldEvent.class, "world init")
 				.description("Called when a world is initialised. As all default worlds are initialised before any scripts are loaded, this event is only called for newly created worlds.",
 						"World management plugins might change the behaviour of this event though.")
 				.examples("")
 				.since("1.0");
-		Skript.registerEvent("World Load", SimpleEvent.class, WorldLoadEvent.class, "world load[ing]")
+		Skript.registerEvent("World Load", SimpleEvent.class, LoadWorldEvent.class, "world load[ing]")
 				.description("Called when a world is loaded. As with the world init event, this event will not be called for the server's default world(s).")
 				.examples("")
 				.since("1.0");
-		Skript.registerEvent("World Save", SimpleEvent.class, WorldSaveEvent.class, "world sav(e|ing)")
+		Skript.registerEvent("World Save", SimpleEvent.class, SaveWorldEvent.class, "world sav(e|ing)")
 				.description("Called when a world is saved to disk. Usually all worlds are saved simultaneously, but world management plugins could change this.")
 				.examples("")
 				.since("1.0");
-		Skript.registerEvent("World Unload", SimpleEvent.class, WorldUnloadEvent.class, "world unload[ing]")
+		Skript.registerEvent("World Unload", SimpleEvent.class, UnloadWorldEvent.class, "world unload[ing]")
 				.description("Called when a world is unloaded. This event might never be called if you don't have a world management plugin.")
 				.examples("")
 				.since("1.0");

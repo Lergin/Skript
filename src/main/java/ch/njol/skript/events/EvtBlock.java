@@ -52,6 +52,9 @@ import ch.njol.skript.lang.SkriptEvent;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.registrations.Classes;
 import ch.njol.util.Checker;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.event.Event;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
 
 /**
  * @author Peter Güttinger
@@ -62,11 +65,11 @@ public class EvtBlock extends SkriptEvent {
 	static {
 		// TODO 'block destroy' event for any kind of block destruction (player, water, trampling, fall (sand, toches, ...), etc) -> BlockPhysicsEvent?
 		// REMIND attacking an item frame first removes its item; include this in on block damage?
-		Skript.registerEvent("Break / Mine", EvtBlock.class, new Class[] {BlockBreakEvent.class, PlayerBucketFillEvent.class, Skript.isRunningMinecraft(1, 4, 3) ? HangingBreakEvent.class : HangingBreakEvent.class}, "[block] (break[ing]|1¦min(e|ing)) [[of] %itemtypes%]")
-				.description("Called when a block is broken by a player. If you use 'on mine', only events where the broken block dropped something will call the trigger.")
+		Skript.registerEvent("Break / Mine", EvtBlock.class, new Class[] {ChangeBlockEvent.Break.class}, "[block] (break[ing]|1¦min(e|ing)) [[of] %itemtypes%]")
+				.description("Called when a block is broken by a player. If you use 'on mine', only events where the broken block dropped something will call the trigger.")//todo: only if drops
 				.examples("on mine", "on break of stone", "on mine of any ore")
 				.since("1.0 (break), <i>unknown</i> (mine)");
-		Skript.registerEvent("Burn", EvtBlock.class, BlockBurnEvent.class, "[block] burn[ing] [[of] %itemtypes%]")
+		Skript.registerEvent("Burn", EvtBlock.class, ChangeBlockEvent..class, "[block] burn[ing] [[of] %itemtypes%]")
 				.description("Called when a block is destroyed by fire.")
 				.examples("on burn", "on burn of wood, fences, or chests")
 				.since("1.0");
@@ -99,17 +102,18 @@ public class EvtBlock extends SkriptEvent {
 	@SuppressWarnings("null")
 	@Override
 	public boolean check(final Event e) {
-		if (mine && e instanceof BlockBreakEvent) {
-			if (((BlockBreakEvent) e).getBlock().getDrops(((BlockBreakEvent) e).getPlayer().getItemInHand()).isEmpty())
-				return false;
+		if (mine && e instanceof ChangeBlockEvent.Break) {
+			//todo is there a way to do this with sponge?!
+			// if (((ChangeBlockEvent.Break) e).getBlock() .getDrops(((BlockBreakEvent) e).getPlayer().getItemInHand()).isEmpty())
+			//	return false;
 		}
 		if (types == null)
 			return true;
 		int id = 0;
 		short durability = 0;
-		if (e instanceof BlockEvent) {
-			id = ((BlockEvent) e).getBlock().getTypeId();
-			durability = ((BlockEvent) e).getBlock().getData();
+		if (e instanceof ChangeBlockEvent.Break) {
+			id = ((ChangeBlockEvent.Break) e).getTransactions().get(0).getOriginal().getState().getType().getId();//todo id to deprecated id
+			durability = ((BlockEvent) e).getBlock().getData();//todo think about an idea to use this with sponge...
 		} else if (e instanceof BlockFormEvent) {
 			id = ((BlockFormEvent) e).getNewState().getTypeId();
 			durability = ((BlockFormEvent) e).getNewState().getRawData();
